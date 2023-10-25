@@ -1,0 +1,31 @@
+version: '3.7'
+services:
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest  # Use the SQL Server image you need
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_USER=SA
+      - SA_PASSWORD=MademoisellePoe01!
+      - MSSQL_SA_PASSWORD_PATH=/var/run/secrets/mssql/sa_password
+      - MSSQL_DB=StocksDb
+      - MSSQL_TCP_PORT=1433
+    ports:
+      - "1433:1433"
+    expose: 
+      - 1433
+      
+  app:
+    build:
+      dockerfile: Dockerfile  # Path to your .NET application's Dockerfile
+      context: .
+    environment:
+      - CONNECTION_STRING="data source=172.17.0.1,1433; initial catalog=StocksDb; user id=SA; password=MademoisellePoe01!; MultipleActiveResultSets=True; TrustServerCertificate=True;" 
+      - MIGRATION=MigrationInitial
+      - ASPNETCORE_ENV=Development
+      - EULA=Y
+      - PATH_TOOLS="$PATH:/root/.dotnet/tools"
+    ports:
+      - "8080:80"  # Expose your application's port here
+    expose: 
+    - 8080
