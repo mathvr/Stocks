@@ -2,10 +2,11 @@
 
 public interface IStockHistoryRepository
 {
-    STOCKS.StockHistory GetByGuid(Guid guid);
-    IQueryable<STOCKS.StockHistory> GetAsQueryable();
-    IQueryable<STOCKS.StockHistory> GetAsQueryableAsNoTracking();
-    void Add(STOCKS.StockHistory stockhistory);
+    stocks.Data.Entities.StockHistory GetByGuid(Guid guid);
+    IQueryable<stocks.Data.Entities.StockHistory> GetAsQueryable();
+    IQueryable<stocks.Data.Entities.StockHistory> GetAsQueryableAsNoTracking();
+    void Add(stocks.Data.Entities.StockHistory stockhistory);
     void Delete(Guid StockHistoryId);
-    void Update(STOCKS.StockHistory stockHistory);
+    void Update(stocks.Data.Entities.StockHistory stockHistory);
+    void Save();
 }

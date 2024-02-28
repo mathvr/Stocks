@@ -74,4 +74,9 @@ public class StockOverviewRepository : IStockOverviewRepository
         _context.Stockoverviews.Update(stockoverview);
         _context.SaveChanges();
     }
+
+    public void Save()
+    {
+        _context.SaveChanges();
+    }
 }

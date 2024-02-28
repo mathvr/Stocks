@@ -1,9 +1,7 @@
 using System.Diagnostics;
 using System.Net;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Newtonsoft.Json;
-using NuGet.Protocol;
 using STOCKS.Data.Repository.Connection;
 using STOCKS.Models;
 
@@ -38,9 +36,9 @@ namespace STOCKS.Clients
 
                 var response = client.GetAsync($"query?function=OVERVIEW&symbol={companySymbol}&apikey={DecodeBase64(connection.ClientSecret)}").Result;
 
-                if(response.StatusCode != HttpStatusCode.OK || response.Content == null)
+                if(response.StatusCode != HttpStatusCode.OK)
                 {
-                    throw new Exception($"There was an error trying to get a response from the external source. StatusCode: {response?.StatusCode}, Content: {response?.Content?.ToString()}");
+                    throw new Exception($"There was an error trying to get a response from the external source. StatusCode: {response?.StatusCode}, Content: {response?.Content}");
                 }
 
                 return JsonConvert.DeserializeObject<StockOverviewApiModel>(response.Content.ReadAsStringAsync().Result);
@@ -113,6 +111,34 @@ namespace STOCKS.Clients
                     $"Time to gather all Companies stock data: {stopwatch.ElapsedMilliseconds / 1000} seconds");
                 
             return modelsList;
+        }
+
+        public async Task<HttpResponseMessage> GetTimeSerie(string symbol, int intervalMinutes)
+        {
+            var connection = _connectionRepository
+                .GetByName("AlphaVantage");
+
+            if(connection == null || connection.BaseUrl == null || connection.ClientSecret == null)
+            {
+                throw new Exception("The connection or the base Url was null, unable to retrieve data from external source");
+            }
+
+            try
+            {
+                using var client = new HttpClient
+                {
+                    BaseAddress = new Uri(connection.BaseUrl),
+                    Timeout = TimeSpan.FromSeconds(30)
+                };
+
+                var query = $"query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval={intervalMinutes}min&outputsize=full&apikey={connection.ClientSecret}";
+
+                return await client.GetAsync(query);
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"An error occured in StocksHttpClient: {e.Message}");
+            }
         }
 
         private string DecodeBase64(string encodedCs)

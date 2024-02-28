@@ -13,7 +13,7 @@ namespace STOCKS.Data.Repository
             _table = _context.Set<T>();
         }
 
-        public IEnumerable<T> GetAll()
+        public IQueryable<T> GetAll()
         {
             return _table.AsQueryable();
         }

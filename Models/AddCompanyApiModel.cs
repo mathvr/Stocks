@@ -7,7 +7,6 @@ namespace STOCKS.Models
 {
     public class AddCompanyApiModel
     {
-        public string UserEmail {get; set;}
         public string CompanySymbol {get; set;}
     }
 }

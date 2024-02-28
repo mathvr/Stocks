@@ -1,6 +1,7 @@
 #!/bin/bash
-gnome-terminal --window-with-profile=Mathieu -- docker-compose up --build sqlserver
-gnome-terminal --window-with-profile=Mathieu -- docker-compose up -d --build app
+gnome-terminal --window-with-profile=Mathieu -- sudo docker-compose up --build sqlserver
+gnome-terminal --window-with-profile=Mathieu -- sudo docker-compose up --build config
+gnome-terminal --window-with-profile=Mathieu -- sudo docker-compose up --build app
 sleep 60
-gnome-terminal --window-with-profile=Mathieu -- systemctl status docker
+gnome-terminal --window-with-profile=Mathieu -- sudo docker inspect   -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' stocks-app-1
 

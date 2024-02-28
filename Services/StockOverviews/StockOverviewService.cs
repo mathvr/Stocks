@@ -4,6 +4,7 @@ using STOCKS.Data.Repository.AppUser;
 using STOCKS.Data.Repository.StockOverview;
 using STOCKS.Mappers;
 using STOCKS.Models;
+using stocks.Services.Session;
 
 namespace STOCKS.Services.StockOverviews
 {
@@ -12,27 +13,29 @@ namespace STOCKS.Services.StockOverviews
         private readonly IStocksHttpClient _stocksHttpClient;
         private readonly IStocksMapper _stocksMapper;
         private readonly IStockOverviewRepository _stockOverviewRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         public IAppUserRepository _appUserRepository { get; }
 
-        public StockOverviewService(IStocksHttpClient stocksHttpClient, IAppUserRepository appUserRepository, IStocksMapper stocksMapper, IStockOverviewRepository stockOverviewRepository)
+        public StockOverviewService(IStocksHttpClient stocksHttpClient, IAppUserRepository appUserRepository, IStocksMapper stocksMapper, IStockOverviewRepository stockOverviewRepository, IHttpContextAccessor httpContextAccessor)
         {
             _appUserRepository = appUserRepository;
             _stocksHttpClient = stocksHttpClient;
             _stocksMapper = stocksMapper;
             _stockOverviewRepository = stockOverviewRepository;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public ServiceResponse AddCompanyToUserProfile(string userEmail, string companySymbol)
+        public ServiceResponse AddCompanyToUserProfile(string companySymbol)
         {
-            var userProfile = _appUserRepository
-                .GetByEmail(userEmail, true);
+            //TODO: Corriger ceci
+            var userProfile = new Appuser();
 
             if (userProfile == null)
             {
                 return new ServiceResponse
                 {
                     WasSuccessfull = false,
-                    Message = $"Could not retrieve user profile from provided user email : {userEmail}"
+                    Message = "Could not retrieve user profile from current Session"
                 };
             }
 
@@ -47,7 +50,7 @@ namespace STOCKS.Services.StockOverviews
                 };
             }
 
-            if (userProfile.Stockoverviews.IsNullOrEmpty())
+            if (userProfile.Stockoverviews == null || !userProfile.Stockoverviews.Any())
             {
                 userProfile.Stockoverviews = new List<StockOverview>();
             }
@@ -129,6 +132,75 @@ namespace STOCKS.Services.StockOverviews
                 Message = "Company Stock Overviews Updated Successfully!",
                 WasSuccessfull = true
             };
+        }
+
+        public List<StockOverviewDto> GetExistingStockOverviews(string query, int top)
+        {
+            var responseList = new List<StockOverview>();
+            try
+            {
+                var apiData = _stocksHttpClient.GetCompanyOverview(query);
+                
+                if (apiData != null && apiData.Symbol != null)
+                {
+                    responseList.Add(_stocksMapper.StockOverViewApiToEntity(apiData));
+                    
+                    var alreadyExists = _stockOverviewRepository
+                        .GetAsQueryableAsNoTracking()
+                        .Any(s => s.Symbol.ToLower().Equals(apiData.Symbol.ToLower()));
+
+                    if (!alreadyExists)
+                    {
+                        _stockOverviewRepository.Add(_stocksMapper.StockOverViewApiToEntity(apiData, false));
+                    }
+                }
+
+                var dbData = RetrieveStockFromQuery(query);
+                
+                if (dbData != null && dbData.Any())
+                {
+                    responseList = responseList.Concat(dbData).ToList();
+                }
+
+                if (responseList.Any())
+                {
+                    return responseList
+                        .Select(ov => _stocksMapper.MapStockOverviewToDto(ov))
+                        .DistinctBy(ov => ov.Symbol)
+                        .OrderBy(ov => ov.Symbol)
+                        .ThenBy(ov => ov.Name)
+                        .Take(top)
+                        .ToList();
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine($"An exception occured while retrieving the company information for query: {query}...  {e.Message}");
+            }
+            return new List<StockOverviewDto>();
+        }
+
+        public List<StockOverviewDto> GetUserStockOverviews(string userEmail)
+        {
+            return _stockOverviewRepository
+                .GetAsQueryableAsNoTracking()
+                .Where(s => s.Appusers
+                    .Any(u => u.Email == userEmail))
+                .Select(s => _stocksMapper.MapStockOverviewToDto(s))
+                .ToList();
+        }
+
+        private List<StockOverview> RetrieveStockFromQuery(string query)
+        {
+            return _stockOverviewRepository
+                .GetAsQueryableAsNoTracking()
+                .Where(s =>
+                    s.Name.Contains(query)
+                    || s.Symbol.Contains(query)
+                    || s.Exchange.Contains(query)
+                    || s.Industry.Contains(query)
+                    || s.Sector.Contains(query))
+                .ToList();
         }
     }
 }

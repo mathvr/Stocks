@@ -28,9 +28,10 @@ public class AppUserRepository : IAppUserRepository
 
         return expandStockOverviews
             ? appUsers
-                .First(a => a.Id.Equals(guid))
+                .Include(a => a.Stockoverviews)
+                .FirstOrDefault(a => a.Id.Equals(guid)) ?? null
             : appUsers
-                .First(a => a.Id.Equals(guid));
+                .FirstOrDefault(a => a.Id.Equals(guid)) ?? null;
     }
 
     public IQueryable<Appuser> GetAsQueryable(bool expandStockOverviews)

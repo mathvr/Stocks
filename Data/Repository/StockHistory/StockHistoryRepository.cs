@@ -11,26 +11,26 @@ public class StockHistoryRepository : IStockHistoryRepository
         _context = context;
     }
 
-    public STOCKS.StockHistory GetByGuid(Guid guid)
+    public stocks.Data.Entities.StockHistory GetByGuid(Guid guid)
     {
         return _context.Stockhistories
             .First(a => a.Id.Equals(guid));
     }
 
-    public IQueryable<STOCKS.StockHistory> GetAsQueryable()
+    public IQueryable<stocks.Data.Entities.StockHistory> GetAsQueryable()
     {
         return _context.Stockhistories
             .AsQueryable();
     }
 
-    public IQueryable<STOCKS.StockHistory> GetAsQueryableAsNoTracking()
+    public IQueryable<stocks.Data.Entities.StockHistory> GetAsQueryableAsNoTracking()
     {
         return _context.Stockhistories
             .AsNoTracking()
             .AsQueryable();
     }
 
-    public void Add(STOCKS.StockHistory stockhistory)
+    public void Add(stocks.Data.Entities.StockHistory stockhistory)
     {
         if (stockhistory == null)
         {
@@ -43,8 +43,6 @@ public class StockHistoryRepository : IStockHistoryRepository
         stockhistory.ModifiedBy = null;
 
         _context.Stockhistories.Add(stockhistory);
-
-        _context.SaveChanges();
     }
 
     public void Delete(Guid StockHistoryId)
@@ -60,12 +58,17 @@ public class StockHistoryRepository : IStockHistoryRepository
         _context.Appusers.Remove(historyToDelete);
     }
 
-    public void Update(STOCKS.StockHistory stockHistory)
+    public void Update(stocks.Data.Entities.StockHistory stockHistory)
     {
         stockHistory.ModifiedOn = DateTimeOffset.Now;
         stockHistory.ModifiedBy = "Admin";
         
         _context.Stockhistories.Update(stockHistory);
+        _context.SaveChanges();
+    }
+
+    public void Save()
+    {
         _context.SaveChanges();
     }
 }

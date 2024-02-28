@@ -1,8 +1,12 @@
-﻿using STOCKS.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using STOCKS.Models;
 
 namespace stocks.Services.AppUsers;
 
 public interface IAppUserService
 {
-    ServiceResponse AddAppUser(AddAppUserApiModel model);
+    TServiceResponse<Task<IdentityResult>> AddAppUser(AddAppUserApiModel model);
+    Task<TServiceResponse<AppUserDto>> LoginUser(LoginApiModel loginApiModel);
+    Task<TServiceResponse<AppUserDto>> GetCurrentUser(string userName);
+
 }

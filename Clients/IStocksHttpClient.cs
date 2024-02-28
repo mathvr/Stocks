@@ -10,5 +10,6 @@ namespace STOCKS.Clients
     {
         StockOverviewApiModel GetCompanyOverview(string companySymbol);
         List<StockOverviewApiModel> GetCompanyOverviews(List<string> companySymbols);
+        Task<HttpResponseMessage>  GetTimeSerie(string symbol, int intervalMinutes);
     }
 }

@@ -10,4 +10,5 @@ public interface IStockOverviewRepository
     void Delete(string stockOverviewName);
 
     void Update(STOCKS.StockOverview stockoverview);
+    void Save();
 }

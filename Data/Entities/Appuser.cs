@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace STOCKS;
 
-public class Appuser
+public class Appuser : IdentityUser
 {
     [Key]
     public Guid Id { get; set; }
