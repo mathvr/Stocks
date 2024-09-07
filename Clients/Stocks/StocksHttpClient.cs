@@ -2,10 +2,13 @@ using System.Diagnostics;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
+using STOCKS;
+using STOCKS.Clients;
+using stocks.Data.Entities;
 using STOCKS.Data.Repository.Connection;
 using STOCKS.Models;
 
-namespace STOCKS.Clients
+namespace stocks.Clients.Stocks
 {
     public class StocksHttpClient : IStocksHttpClient
     {
@@ -18,13 +21,7 @@ namespace STOCKS.Clients
 
         public StockOverviewApiModel GetCompanyOverview(string companySymbol)
         {
-            var connection = _connectionRepository
-                .GetByName("AlphaVantage");
-
-            if(connection == null || connection.BaseUrl == null || connection.ClientSecret == null)
-            {
-                throw new Exception("The connection or the base Url was null, unable to retrieve data from external source");
-            }
+            var connection = GetTiingoConnection();
 
             try
             {
@@ -34,7 +31,7 @@ namespace STOCKS.Clients
                     Timeout = TimeSpan.FromSeconds(30)
                 };
 
-                var response = client.GetAsync($"query?function=OVERVIEW&symbol={companySymbol}&apikey={DecodeBase64(connection.ClientSecret)}").Result;
+                var response = client.GetAsync($"/tiingo/daily/{companySymbol}?token={DecodeBase64(connection.ClientSecret)}").Result;
 
                 if(response.StatusCode != HttpStatusCode.OK)
                 {
@@ -53,8 +50,7 @@ namespace STOCKS.Clients
         {
             var stopwatch = new Stopwatch();
             var tasks = new List<Task<HttpResponseMessage>>();
-            var connection = _connectionRepository
-                .GetByName("AlphaVantage");
+            var connection = GetTiingoConnection();
 
             var modelsList = new List<StockOverviewApiModel>();
             
@@ -69,8 +65,7 @@ namespace STOCKS.Clients
                 {
                     companySymbols.ForEach(symbol =>
                     {
-                        var response = client
-                            .GetAsync($"query?function=OVERVIEW&symbol={symbol}&apikey={DecodeBase64(connection.ClientSecret)}");
+                        var response = client.GetAsync($"/tiingo/daily/{symbol}?token={DecodeBase64(connection.ClientSecret)}");
 
                         tasks.Add(response);
                     });
@@ -113,16 +108,10 @@ namespace STOCKS.Clients
             return modelsList;
         }
 
-        public async Task<HttpResponseMessage> GetTimeSerie(string symbol, int intervalMinutes)
+        public async Task<StockOverviewandResponse> GetTimeSerie(StockOverview stockOverview, DateTime fromDate)
         {
-            var connection = _connectionRepository
-                .GetByName("AlphaVantage");
-
-            if(connection == null || connection.BaseUrl == null || connection.ClientSecret == null)
-            {
-                throw new Exception("The connection or the base Url was null, unable to retrieve data from external source");
-            }
-
+            var connection = GetTiingoConnection();
+            
             try
             {
                 using var client = new HttpClient
@@ -131,9 +120,13 @@ namespace STOCKS.Clients
                     Timeout = TimeSpan.FromSeconds(30)
                 };
 
-                var query = $"query?function=TIME_SERIES_INTRADAY&symbol={symbol}&interval={intervalMinutes}min&outputsize=full&apikey={connection.ClientSecret}";
+                var query = $"/tiingo/daily/{stockOverview.Symbol}/prices?startDate={fromDate:yyyy-MM-dd}&format=json&token={DecodeBase64(connection.ClientSecret)}";
 
-                return await client.GetAsync(query);
+                return new StockOverviewandResponse
+                {
+                    StockOverview = stockOverview,
+                    Response = await client.GetAsync(query)
+                };
             }
             catch (Exception e)
             {
@@ -144,6 +137,19 @@ namespace STOCKS.Clients
         private string DecodeBase64(string encodedCs)
         {
             return Encoding.UTF8.GetString(Convert.FromBase64String(encodedCs)); 
+        }
+
+        private Connection GetTiingoConnection()
+        {
+            var connection = _connectionRepository
+                .GetByName("Tiingo");
+
+            if(connection == null || connection.BaseUrl == null || connection.ClientSecret == null)
+            {
+                throw new Exception("The connection or the base Url was null, unable to retrieve data from external source");
+            }
+
+            return connection;
         }
     }
 }

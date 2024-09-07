@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace stocks.Services;
+namespace stocks.Services.Helpers;
 
 public static class EncryptionService
 {

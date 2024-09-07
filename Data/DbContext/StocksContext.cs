@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using STOCKS;
 using stocks.Data.Entities;
 
-namespace STOCKS;
+namespace stocks.Data.DbContext;
 
 public class StocksContext : IdentityDbContext
 {
@@ -21,6 +20,8 @@ public class StocksContext : IdentityDbContext
     public virtual DbSet<StockHistory> Stockhistories { get; set; }
 
     public virtual DbSet<StockOverview> Stockoverviews { get; set; }
+    
+    public virtual DbSet<Article> Articles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

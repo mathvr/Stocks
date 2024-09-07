@@ -2,13 +2,13 @@
 
 public interface IStockOverviewRepository
 {
-    STOCKS.StockOverview GetByNamel(string name);
-    STOCKS.StockOverview GetByGuid(Guid guid);
-    IQueryable<STOCKS.StockOverview> GetAsQueryable();
-    IQueryable<STOCKS.StockOverview> GetAsQueryableAsNoTracking();
-    void Add(STOCKS.StockOverview stockoverview);
+    stocks.Data.Entities.StockOverview GetByName(string name);
+    stocks.Data.Entities.StockOverview GetByGuid(Guid guid);
+    IQueryable<stocks.Data.Entities.StockOverview> GetAsQueryable();
+    IQueryable<stocks.Data.Entities.StockOverview> GetAsQueryableAsNoTracking();
+    void Add(stocks.Data.Entities.StockOverview stockoverview);
     void Delete(string stockOverviewName);
 
-    void Update(STOCKS.StockOverview stockoverview);
+    void Update(stocks.Data.Entities.StockOverview stockoverview);
     void Save();
 }

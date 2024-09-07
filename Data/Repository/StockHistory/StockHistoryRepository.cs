@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using stocks.Data.DbContext;
 
 namespace STOCKS.Data.Repository.StockHistory;
 
@@ -38,9 +39,7 @@ public class StockHistoryRepository : IStockHistoryRepository
         }
 
         stockhistory.CreatedOn = DateTimeOffset.Now;
-        stockhistory.CreatedBy = "Admin";
         stockhistory.ModifiedOn = null;
-        stockhistory.ModifiedBy = null;
 
         _context.Stockhistories.Add(stockhistory);
     }
@@ -61,7 +60,6 @@ public class StockHistoryRepository : IStockHistoryRepository
     public void Update(stocks.Data.Entities.StockHistory stockHistory)
     {
         stockHistory.ModifiedOn = DateTimeOffset.Now;
-        stockHistory.ModifiedBy = "Admin";
         
         _context.Stockhistories.Update(stockHistory);
         _context.SaveChanges();

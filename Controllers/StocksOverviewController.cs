@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using STOCKS.Clients;
+using stocks.Data.Entities;
 using STOCKS.Models;
-using stocks.Services;
+using stocks.Services.Computation;
+using stocks.Services.News;
 using STOCKS.Services.StockOverviews;
+using stocks.Services.TimeSeries;
 
 namespace STOCKS.Controllers;
 
@@ -12,15 +13,19 @@ namespace STOCKS.Controllers;
 [Route("StocksOverview")]
 public class StocksOverviewController : ControllerBase
 {
+    private readonly INewsService _newsService;
     private readonly IStocksHttpClient _stocksHttpClient;
     private readonly IStocksOverviewService _stocksOverviewService;
     private readonly ITimeSeriesService _timeSeriesService;
+    private readonly IComputationService _computationService;
 
-    public StocksOverviewController(IStocksHttpClient stocksHttpClient, IStocksOverviewService stocksOverviewService, ITimeSeriesService timeSeriesService)
+    public StocksOverviewController(INewsService newsService, IStocksHttpClient stocksHttpClient, IStocksOverviewService stocksOverviewService, ITimeSeriesService timeSeriesService, IComputationService computationService)
     {
+        _newsService = newsService;
         _stocksHttpClient = stocksHttpClient;
         _stocksOverviewService = stocksOverviewService;
         _timeSeriesService = timeSeriesService;
+        _computationService = computationService;
     }
 
     [HttpGet]
@@ -39,14 +44,46 @@ public class StocksOverviewController : ControllerBase
     [Route("GetCompanyOverviews/query={query}&top={top}")]
     public ActionResult<List<StockOverviewDto>> GetStockOverviews(string query, int top)
     {
-        var overviews = _stocksOverviewService.GetExistingStockOverviews(query, top);
+        var response = _stocksOverviewService.GetExistingStockOverviews(query, top);
 
-        if (overviews.Any())
+        if (response.WasSuccessfull)
         {
-            return Ok(overviews);
+            return response.Data.Any()
+                ? Ok(response.Data)
+                : NotFound(response.Message);
         }
 
-        return NotFound();
+        return BadRequest(response.Message);
+    }
+
+    [HttpGet]
+    [Route("Compute/PriceDifference/SinceDays={days}")]
+    public ActionResult<StockProgressionModels> GetPriceDifferencesSince(int days)
+    {
+        if (days < 1)
+        {
+            return BadRequest("Days must be greater than 0");
+        }
+        
+        var startDate = DateTime.Now.AddDays(-days);
+        var endDate = DateTime.Now;
+        var response = _computationService.GetByMostProgression(startDate, endDate);
+
+        return Ok(response);
+    }
+
+    [HttpPost]
+    [Route("AddOverview/symbol={symbol}")]
+    public ActionResult AddOverview(string symbol)
+    {
+        var response = _stocksOverviewService.AddCompanyToSite(symbol);
+
+        if (!response.WasSuccessfull)
+        {
+            return BadRequest(response.Message);
+        }
+
+        return Ok(response.Message);
     }
     
     [HttpGet]
@@ -61,11 +98,11 @@ public class StocksOverviewController : ControllerBase
     }
 
     [HttpPost]
-    [Route("DownloadTimeSeries")]
-    public ActionResult<string> DownloadTimeSeries()
+    [Route("DownloadTimeSeries/FromDaysAgo={daysAgo}")]
+    public ActionResult<string> DownloadTimeSeries(int daysAgo)
     {
-        var response = _timeSeriesService.SaveAllSeries(60);
-
+        var response = _timeSeriesService.SaveAllSeries(DateTime.Now.AddDays(-1 * daysAgo));
+        
         if (response.WasSuccessfull)
         {
             return Ok();
@@ -114,5 +151,56 @@ public class StocksOverviewController : ControllerBase
         }
 
         return BadRequest(result.Message);
+    }
+
+    [HttpPost]
+    [Route("DownloadNews/fromDaysAgo={daysAgo}")]
+    public IActionResult DownloadNews(int daysAgo)
+    {
+        if (daysAgo < 1)
+        {
+            return BadRequest("Days must be greater than 0");
+        }
+        
+        var result = _newsService.AddArticles(daysAgo);
+
+        if (result.WasSuccessfull)
+        {
+            return Ok(result.Message);
+        }
+        
+        return BadRequest(result.Message);
+    }
+
+    [HttpGet]
+    [Route("GetNews/symbol={symbol}&fromDays={fromDays}")]
+    public ActionResult<List<ArticleDto>> GetNews(string symbol, int fromDays)
+    {
+        if (fromDays < 1)
+        {
+            return BadRequest("From days must be greater than 0");
+        }
+
+        if (string.IsNullOrWhiteSpace(symbol))
+        {
+            return BadRequest("Symbol must be provided");
+        }
+
+        var serviceResponse = _newsService.GetByStockOverview(symbol, fromDays);
+
+        if (serviceResponse.WasSuccessfull && serviceResponse.Data.Any())
+        {
+            return Ok(serviceResponse.Data);
+        }
+        else if (serviceResponse.WasSuccessfull && !serviceResponse.Data.Any())
+        {
+            return NotFound("No articles were found");
+        }
+        else if (!serviceResponse.WasSuccessfull)
+        {
+            return Conflict("An error occured while getting the data");
+        }
+
+        return BadRequest();
     }
 }

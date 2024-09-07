@@ -5,15 +5,23 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using STOCKS;
 using STOCKS.Clients;
+using stocks.Clients.News;
+using stocks.Clients.Stocks;
+using stocks.Data.DbContext;
+using stocks.Data.Entities;
+using STOCKS.Data.Repository;
 using STOCKS.Data.Repository.AppUser;
 using STOCKS.Data.Repository.Connection;
+using STOCKS.Data.Repository.News;
 using STOCKS.Data.Repository.StockHistory;
 using STOCKS.Data.Repository.StockOverview;
 using STOCKS.Mappers;
-using stocks.Services;
 using stocks.Services.AppUsers;
+using stocks.Services.Computation;
+using stocks.Services.News;
 using stocks.Services.Session;
 using STOCKS.Services.StockOverviews;
+using stocks.Services.TimeSeries;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +56,7 @@ builder.Services.AddDbContext<StocksContext>(
     options => options.UseSqlServer(config["Database:ConnectionString"]));
 
 // Add services to the container.
+
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 builder.Services.AddScoped<IConnectionRepository, ConnectionRepository>();
 builder.Services.AddScoped<IStockOverviewRepository, StockOverviewRepository>();
@@ -60,6 +69,10 @@ builder.Services.AddScoped<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<ITimeSeriesService, TimeSeriesService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IConfigurationHelper, ConfigurationHelper>();
+builder.Services.AddScoped<IComputationService, ComputationService>();
+builder.Services.AddScoped<INewsHttpClient, NewsHttpClient>();
+builder.Services.AddScoped<IRepository<Article>, NewsRepository>();
+builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddCors();
 
 var app = builder.Build();

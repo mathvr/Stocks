@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using stocks.Data.Entities;
 using STOCKS.Models;
+using Article = stocks.Data.Entities.Article;
 
 namespace STOCKS.Mappers
 {
@@ -14,22 +15,10 @@ namespace STOCKS.Mappers
             return new StockOverview
             {
                 Name = apiModel.Name,
-                Cik = apiModel.Cik,
-                Industry = apiModel.Industry,
                 Exchange = apiModel.Exchange,
                 Description = apiModel.Description, 
-                Currency = apiModel.Currency, 
-                Country = apiModel.Country,
-                Sector = apiModel.Sector,
                 Symbol = apiModel.Symbol,
-                FiscalYearEnd = apiModel.Fiscalyearend, 
-                MarketCapitalization = apiModel.Marketcapitalization,
-                BookValue = apiModel.Bookvalue,
-                ProfitMargin = apiModel.Profitmargin,
-                LatestQuarter = apiModel.Latestquarted,
-                CreatedBy = asUpdate ? string.Empty : "Admin",
                 CreatedOn = asUpdate ? null : DateTimeOffset.Now,
-                ModifiedBy = asUpdate ? "Admin" : string.Empty ,
                 ModifiedOn = asUpdate ? DateTimeOffset.Now : null
             };
         }
@@ -37,20 +26,9 @@ namespace STOCKS.Mappers
         public void StockOverViewApiToEntityUpdate(StockOverviewApiModel apiModel, StockOverview stockoverview)
         {
             stockoverview.Name = apiModel.Name;
-            stockoverview.Cik = apiModel.Cik;
-            stockoverview.Industry = apiModel.Industry;
             stockoverview.Exchange = apiModel.Exchange;
             stockoverview.Description = apiModel.Description;
-            stockoverview.Currency = apiModel.Currency;
-            stockoverview.Country = apiModel.Country;
-            stockoverview.Sector = apiModel.Sector;
             stockoverview.Symbol = apiModel.Symbol;
-            stockoverview.FiscalYearEnd = apiModel.Fiscalyearend;
-            stockoverview.MarketCapitalization = apiModel.Marketcapitalization;
-            stockoverview.BookValue = apiModel.Bookvalue;
-            stockoverview.ProfitMargin = apiModel.Profitmargin;
-            stockoverview.LatestQuarter = apiModel.Latestquarted;
-            stockoverview.ModifiedBy = "Admin";
             stockoverview.ModifiedOn = DateTimeOffset.Now;
         }
         
@@ -59,20 +37,9 @@ namespace STOCKS.Mappers
             return new StockOverview
             {
                 Name = apiModel.Name,
-                Cik = apiModel.Cik,
-                Industry = apiModel.Industry,
                 Exchange = apiModel.Exchange,
                 Description = apiModel.Description,
-                Currency = apiModel.Currency,
-                Country = apiModel.Country,
-                Sector = apiModel.Sector,
                 Symbol = apiModel.Symbol,
-                FiscalYearEnd = apiModel.Fiscalyearend,
-                MarketCapitalization = apiModel.Marketcapitalization,
-                BookValue = apiModel.Bookvalue,
-                ProfitMargin = apiModel.Profitmargin,
-                LatestQuarter = apiModel.Latestquarted,
-                ModifiedBy = "Admin",
                 ModifiedOn = DateTimeOffset.Now
             };
         }
@@ -82,33 +49,61 @@ namespace STOCKS.Mappers
             return new StockOverviewDto
             {
                 Name = stockOverview.Name,
-                Cik = stockOverview.Cik,
-                Currency = stockOverview.Currency,
                 Exchange = stockOverview.Exchange,
-                Industry = stockOverview.Industry,
-                Marketcapitalization = stockOverview.MarketCapitalization,
-                Sector = stockOverview.Sector,
                 Symbol = stockOverview.Symbol,
                 Description = stockOverview.Description, 
-                BookValue = stockOverview.BookValue,
-                ProfitMargin = stockOverview.ProfitMargin
+                StartDate = stockOverview.StartDate,
+                EndDate = stockOverview.EndDate
             };
         }
 
-        public StockHistory MapTimeSerieToEntity(KeyValuePair<DateTime, TimeSerieApiModel.TimeSerieUnit> timeSerie, StockOverview stockOverview)
+        public StockHistory MapTimeSerieToEntity(TimeSerieApiModel model, StockOverview stockOverview)
         {
             return new StockHistory
             {
-                CloseValue = timeSerie.Value?.Close,
-                OpenValue = timeSerie.Value?.Open,
-                HighValue = timeSerie.Value?.High,
-                LowValue = timeSerie.Value?.Low,
-                Volume = timeSerie.Value?.Volume,
-                Date = timeSerie.Key,
+                CloseValue = model.CloseValue,
+                OpenValue = model.OpenValue,
+                HighValue = model.High,
+                LowValue = model.Low,
+                Volume = model.Volume,
+                Date = model.Date,
                 Id = Guid.NewGuid(),
-                CreatedBy = "Admin",
                 CreatedOn = DateTimeOffset.Now,
                 StockOverviewId = stockOverview?.Id
+            };
+        }
+
+        public Article MapArticleToEntity(ArticleApiModel articleApiModel, StockOverview stockOverview)
+        {
+            return new Article
+            {
+                Title = articleApiModel.Title ?? string.Empty,
+                Author = articleApiModel.Author ?? string.Empty,
+                Content = articleApiModel.Content ?? string.Empty,
+                CreatedOn = DateTimeOffset.Now,
+                Description = articleApiModel.Description ?? string.Empty,
+                Id = Guid.NewGuid(),
+                PublicationDate = articleApiModel.PublishDate,
+                StockOverviewId = stockOverview.Id,
+                ModifiedOn = null,
+                SourceName = articleApiModel.Source.Name ?? string.Empty,
+                Url = articleApiModel.Url ?? string.Empty,
+                StockOverview = stockOverview
+            };
+        }
+
+        public ArticleDto MapArticleToDto(Article article)
+        {
+            return new ArticleDto
+            {
+                Title = article.Title ?? string.Empty,
+                Author = article.Author ?? string.Empty,
+                Content = article.Content ?? string.Empty,
+                Id = article.Id,
+                PublicationDate = article.PublicationDate,
+                SourceName = article.SourceName ?? string.Empty,
+                StockSymbol = article.StockOverview?.Symbol ?? string.Empty,
+                Url = article.Url ?? string.Empty,
             };
         }
     }

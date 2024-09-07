@@ -2,6 +2,7 @@
 using STOCKS;
 using STOCKS.Data.Repository.AppUser;
 using STOCKS.Models;
+using stocks.Services.Helpers;
 using stocks.Services.Session;
 
 namespace stocks.Services.AppUsers;

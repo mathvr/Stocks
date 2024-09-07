@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using stocks.Data.Entities;
 using STOCKS.Models;
 
 namespace STOCKS.Clients
@@ -10,6 +11,6 @@ namespace STOCKS.Clients
     {
         StockOverviewApiModel GetCompanyOverview(string companySymbol);
         List<StockOverviewApiModel> GetCompanyOverviews(List<string> companySymbols);
-        Task<HttpResponseMessage>  GetTimeSerie(string symbol, int intervalMinutes);
+        Task<StockOverviewandResponse> GetTimeSerie(StockOverview stockOverview, DateTime fromDate);
     }
 }

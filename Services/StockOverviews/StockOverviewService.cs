@@ -1,5 +1,6 @@
 using Microsoft.IdentityModel.Tokens;
 using STOCKS.Clients;
+using stocks.Data.Entities;
 using STOCKS.Data.Repository.AppUser;
 using STOCKS.Data.Repository.StockOverview;
 using STOCKS.Mappers;
@@ -134,50 +135,44 @@ namespace STOCKS.Services.StockOverviews
             };
         }
 
-        public List<StockOverviewDto> GetExistingStockOverviews(string query, int top)
+        public TServiceResponse<List<StockOverviewDto>> GetExistingStockOverviews(string query, int top)
         {
-            var responseList = new List<StockOverview>();
             try
             {
-                var apiData = _stocksHttpClient.GetCompanyOverview(query);
-                
-                if (apiData != null && apiData.Symbol != null)
-                {
-                    responseList.Add(_stocksMapper.StockOverViewApiToEntity(apiData));
-                    
-                    var alreadyExists = _stockOverviewRepository
-                        .GetAsQueryableAsNoTracking()
-                        .Any(s => s.Symbol.ToLower().Equals(apiData.Symbol.ToLower()));
-
-                    if (!alreadyExists)
-                    {
-                        _stockOverviewRepository.Add(_stocksMapper.StockOverViewApiToEntity(apiData, false));
-                    }
-                }
-
                 var dbData = RetrieveStockFromQuery(query);
-                
-                if (dbData != null && dbData.Any())
+
+                if (dbData.Any())
                 {
-                    responseList = responseList.Concat(dbData).ToList();
+                    return new TServiceResponse<List<StockOverviewDto>>
+                    {
+                        Data = dbData
+                            .Select(ov => _stocksMapper.MapStockOverviewToDto(ov))
+                            .DistinctBy(ov => ov.Symbol)
+                            .OrderBy(ov => ov.Symbol)
+                            .ThenBy(ov => ov.Name)
+                            .Take(top)
+                            .ToList(),
+                        Message = "Query successfully executed!",
+                        WasSuccessfull = true
+                    };
                 }
 
-                if (responseList.Any())
+                return new TServiceResponse<List<StockOverviewDto>>
                 {
-                    return responseList
-                        .Select(ov => _stocksMapper.MapStockOverviewToDto(ov))
-                        .DistinctBy(ov => ov.Symbol)
-                        .OrderBy(ov => ov.Symbol)
-                        .ThenBy(ov => ov.Name)
-                        .Take(top)
-                        .ToList();
-                }
+                    WasSuccessfull = true,
+                    Message = "This title could not be retrieved from database, try adding it with endpoint AddOverview/symbol={symbol}"
+                };
             }
             catch(Exception e)
             {
                 Console.WriteLine($"An exception occured while retrieving the company information for query: {query}...  {e.Message}");
+
+                return new TServiceResponse<List<StockOverviewDto>>
+                {
+                    WasSuccessfull = false,
+                    Message = "An error occured while retrieving the company information for query."
+                };
             }
-            return new List<StockOverviewDto>();
         }
 
         public List<StockOverviewDto> GetUserStockOverviews(string userEmail)
@@ -197,9 +192,7 @@ namespace STOCKS.Services.StockOverviews
                 .Where(s =>
                     s.Name.Contains(query)
                     || s.Symbol.Contains(query)
-                    || s.Exchange.Contains(query)
-                    || s.Industry.Contains(query)
-                    || s.Sector.Contains(query))
+                    || s.Exchange.Contains(query))
                 .ToList();
         }
     }

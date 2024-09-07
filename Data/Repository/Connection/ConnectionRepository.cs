@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using stocks.Data.DbContext;
 
 namespace STOCKS.Data.Repository.Connection;
 

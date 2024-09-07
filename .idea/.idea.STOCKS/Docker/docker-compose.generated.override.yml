@@ -3,26 +3,7 @@ version: "3.7"
 services:
   app:
     build:
-      context: "/home/math/Desktop/Programmation/Stocks"
-      dockerfile: "DockerfileBuildRun"
-      target: "build-env"
-    command: []
-    entrypoint:
-    - "dotnet"
-    - "/app/bin/Debug/net8.0/stocks.dll"
-    environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
-      DOTNET_USE_POLLING_FILE_WATCHER: "true"
-    image: "stocks:dev"
-    ports: []
-    volumes:
-    - "/home/math/.nuget/packages:/root/.nuget/packages"
-    - "/home/math/Desktop/Programmation/Stocks:/app:rw"
-    - "/home/math/Desktop/Programmation/Stocks:/src:rw"
-    working_dir: "/app"
-  config:
-    build:
-      context: "/home/math/Desktop/Programmation/Stocks"
+      context: "/home/math/RiderProjects/Stocks"
       dockerfile: "DockerfileConfig"
     command: []
     entrypoint:
@@ -30,11 +11,27 @@ services:
     - "/app/bin/Debug/net8.0/stocks.dll"
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
-      DOTNET_USE_POLLING_FILE_WATCHER: "true"
     image: "stocks:dev"
     ports: []
     volumes:
     - "/home/math/.nuget/packages:/root/.nuget/packages"
-    - "/home/math/Desktop/Programmation/Stocks:/app:rw"
-    - "/home/math/Desktop/Programmation/Stocks:/src:rw"
+    - "/home/math/RiderProjects/Stocks:/app:rw"
+    - "/home/math/RiderProjects/Stocks:/src:rw"
+    working_dir: "/app"
+  config:
+    build:
+      context: "/home/math/RiderProjects/Stocks"
+      dockerfile: "DockerfileConfig"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/stocks.dll"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+    image: "stocks:dev"
+    ports: []
+    volumes:
+    - "/home/math/.nuget/packages:/root/.nuget/packages"
+    - "/home/math/RiderProjects/Stocks:/app:rw"
+    - "/home/math/RiderProjects/Stocks:/src:rw"
     working_dir: "/app"

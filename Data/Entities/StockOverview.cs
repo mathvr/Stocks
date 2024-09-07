@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using stocks.Data.Entities;
+using STOCKS;
 
-namespace STOCKS;
+namespace stocks.Data.Entities;
 
 public class StockOverview
 {
@@ -11,37 +11,17 @@ public class StockOverview
     public string Name { get; set; } = null!;
 
     public string Symbol { get; set; } = null!;
-
-    public int Cik { get; set; }
-
-    public string Industry { get; set; } = null!;
-
+    
     public string Exchange { get; set; } = null!;
 
     public string? Description { get; set; }
-
-    public string Currency { get; set; } = null!;
-
-    public string Country { get; set; } = null!;
-
-    public string Sector { get; set; } = null!;
-
-    public string FiscalYearEnd { get; set; } = null!;
-
-    public decimal? MarketCapitalization { get; set; }
-
-    public decimal? BookValue { get; set; }
-
-    public decimal? ProfitMargin { get; set; }
-
-    public DateTimeOffset? LatestQuarter { get; set; }
-
-    public string? CreatedBy { get; set; }
-
+    
+    public DateTime StartDate { get; set; }
+    
+    public DateTime EndDate { get; set; }
+    
     public DateTimeOffset? CreatedOn { get; set; }
-
-    public string? ModifiedBy { get; set; }
-
+    
     public DateTimeOffset? ModifiedOn { get; set; }
 
     public virtual ICollection<StockHistory> Stockhistories { get; set; } = new List<StockHistory>();

@@ -13,8 +13,8 @@ namespace STOCKS.Mappers
         void StockOverViewApiToEntityUpdate(StockOverviewApiModel apiModel, StockOverview stockoverview);
         StockOverviewDto MapStockOverviewToDto(StockOverview stockOverview);
         StockOverview StockOverViewApiToEntity(StockOverviewApiModel apiModel);
-
-        StockHistory MapTimeSerieToEntity(KeyValuePair<DateTime, TimeSerieApiModel.TimeSerieUnit> timeSerie,
-            StockOverview stockOverview);
+        StockHistory MapTimeSerieToEntity(TimeSerieApiModel model, StockOverview stockOverview);
+        Article MapArticleToEntity(ArticleApiModel articleApiModel, StockOverview stockOverview);
+        ArticleDto MapArticleToDto(Article article);
     }
 }

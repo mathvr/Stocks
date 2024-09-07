@@ -8,6 +8,6 @@ namespace STOCKS.Services.StockOverviews
         public ServiceResponse AddCompanyToSite(string companySymbol);
         ServiceResponse UpdateStockOverviews();
         List<StockOverviewDto> GetUserStockOverviews(string userEmail);
-        List<StockOverviewDto> GetExistingStockOverviews(string query, int top);
+        TServiceResponse<List<StockOverviewDto>> GetExistingStockOverviews(string query, int top);
     }
 }

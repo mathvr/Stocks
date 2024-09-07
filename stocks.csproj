@@ -22,7 +22,6 @@
     <PackageReference Include="WebGrease" Version="1.6.0" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Controllers\Data" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 </Project>

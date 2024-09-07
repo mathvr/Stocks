@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using stocks.Data.DbContext;
+using stocks.Data.Entities;
 
 namespace STOCKS.Data.Repository.StockOverview;
 
@@ -11,32 +13,32 @@ public class StockOverviewRepository : IStockOverviewRepository
         _context = context;
     }
     
-    public STOCKS.StockOverview GetByNamel(string name)
+    public stocks.Data.Entities.StockOverview GetByName(string name)
     {
         return _context.Stockoverviews
             .First(s => s.Name.Equals(name));
     }
 
-    public STOCKS.StockOverview GetByGuid(Guid guid)
+    public stocks.Data.Entities.StockOverview GetByGuid(Guid guid)
     {
         return _context.Stockoverviews
             .First(s => s.Id.Equals(guid));
     }
 
-    public IQueryable<STOCKS.StockOverview> GetAsQueryable()
+    public IQueryable<stocks.Data.Entities.StockOverview> GetAsQueryable()
     {
         return _context.Stockoverviews
             .AsQueryable();
     }
 
-    public IQueryable<STOCKS.StockOverview> GetAsQueryableAsNoTracking()
+    public IQueryable<stocks.Data.Entities.StockOverview> GetAsQueryableAsNoTracking()
     {
         return _context.Stockoverviews
             .AsQueryable()
             .AsNoTracking();
     }
 
-    public void Add(STOCKS.StockOverview stockoverview)
+    public void Add(stocks.Data.Entities.StockOverview stockoverview)
     {
         if (stockoverview == null)
         {
@@ -44,9 +46,7 @@ public class StockOverviewRepository : IStockOverviewRepository
         }
         
         stockoverview.CreatedOn = DateTimeOffset.Now;
-        stockoverview.CreatedBy = "Admin";
         stockoverview.ModifiedOn = null;
-        stockoverview.ModifiedBy = null;
 
         _context.Stockoverviews.Add(stockoverview);
 
@@ -66,9 +66,8 @@ public class StockOverviewRepository : IStockOverviewRepository
         _context.Stockoverviews.Remove(stockToDelete);
     }
 
-    public void Update(STOCKS.StockOverview stockoverview)
+    public void Update(stocks.Data.Entities.StockOverview stockoverview)
     {
-        stockoverview.ModifiedBy = "Admin";
         stockoverview.ModifiedOn = DateTimeOffset.Now;
         
         _context.Stockoverviews.Update(stockoverview);
