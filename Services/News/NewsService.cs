@@ -16,11 +16,11 @@ namespace stocks.Services.News;
 public class NewsService : INewsService
 {
     private readonly IRepository<Article> _articleRepository;
-    private readonly IStockOverviewRepository _stockOverviewRepository;
+    private readonly IRepository<StockOverview> _stockOverviewRepository;
     private readonly INewsHttpClient _newsHttpClient;
     private readonly IStocksMapper _mapper;
 
-    public NewsService(IRepository<Article> articleRepository, IStockOverviewRepository stockOverviewRepository, 
+    public NewsService(IRepository<Article> articleRepository, IRepository<StockOverview> stockOverviewRepository, 
         INewsHttpClient newsHttpClient, IStocksMapper mapper)
     {
         _articleRepository = articleRepository;

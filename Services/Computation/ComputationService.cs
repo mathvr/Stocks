@@ -1,23 +1,28 @@
 using Microsoft.EntityFrameworkCore;
 using stocks.Data.Entities;
-using STOCKS.Data.Repository.StockHistory;
-using STOCKS.Data.Repository.StockOverview;
+using STOCKS.Data.Repository;
 using STOCKS.Models;
 
 namespace stocks.Services.Computation;
 
 public class ComputationService : IComputationService
 {
-    private readonly IStockOverviewRepository _stockOverviewRepository;
-    private readonly IStockHistoryRepository _stockHistoryRepository;
+    private readonly IRepository<StockOverview> _stockOverviewRepository;
+    private readonly IRepository<StockHistory>  _stockHistoryRepository;
+    private readonly IRepository<Split> _splitRepository;
 
-    public ComputationService(IStockOverviewRepository stockOverviewRepository, IStockHistoryRepository stockHistoryRepository)
+    public ComputationService(IRepository<StockOverview> stockOverviewRepository, IRepository<StockHistory> stockHistoryRepository, IRepository<Split> splitRepository)
     {
         _stockOverviewRepository = stockOverviewRepository;
         _stockHistoryRepository = stockHistoryRepository;
+        _splitRepository = splitRepository;
     }
     public StockProgressionModels GetByMostProgression(DateTime startDate, DateTime endDate)
     {
+        var existingSymbols = GetExistingSymbols();
+        
+        var splits = GetSplits(existingSymbols, startDate, endDate);
+            
         var models = _stockHistoryRepository
             .GetAsQueryableAsNoTracking()
             .Include(s => s.StockOverview)
@@ -27,13 +32,13 @@ public class ComputationService : IComputationService
             .GroupBy(s => s.StockOverview.Symbol)
             .Select(s =>
             {
-                var differenceData = GetHistoryDifference(s);
+                var differenceData = GetHistoryDifference(s, splits);
                 return new StockProgressionModel
                 {
                     Symbol = s.Key,
                     Difference = differenceData.Difference,
                     Percent = Decimal.Round(differenceData.Percent,0),
-                    HasSplit = default //TODO Manage Splits
+                    HasSplit = splits.Any(split => split.Symbol.Equals(s.Key)),
                 };
             })
             .OrderByDescending(s => s.Percent)
@@ -48,7 +53,7 @@ public class ComputationService : IComputationService
         };
     }
 
-    private StockDifference GetHistoryDifference(IGrouping<string, StockHistory> group)
+    private StockDifference GetHistoryDifference(IGrouping<string, StockHistory> group, List<Split> splits)
     {
         var endValue = group
             .OrderByDescending(d => d.Date)
@@ -58,11 +63,52 @@ public class ComputationService : IComputationService
             .OrderBy(d => d.Date)
             .First();
 
+        var split = splits.Where(s => s.Symbol.Equals(group.Key));
+
+        if (split.Any())
+        {
+            var ratio = GetSplitRatio(splits);
+            endValue.CloseValue *= ratio;
+            endValue.OpenValue *= ratio;
+        }
+
         return new StockDifference
         {
             Difference = endValue.CloseValue - firstValue.OpenValue ?? 0,
             Percent = ((endValue.CloseValue - firstValue.CloseValue) / (endValue.CloseValue + firstValue.OpenValue) / 2) * 100 ?? 0
         };
 
+    }
+
+    private decimal GetSplitRatio(IEnumerable<Split> splits)
+    {
+        var ratio = 1m;
+        
+        foreach (var split in splits)
+        {
+            var currentRatio = split.NewValue / split.InitialValue;
+            ratio *= currentRatio;
+        }
+
+        return ratio;
+    }
+
+    private List<string> GetExistingSymbols()
+    {
+        return _stockOverviewRepository
+            .GetAsQueryableAsNoTracking()
+            .Select(s => s.Symbol)
+            .ToList();
+    }
+
+    private List<Split> GetSplits(List<string> existingSymbols, DateTime startDate, DateTime endDate)
+    {
+        return _splitRepository
+            .GetAsQueryableAsNoTracking()
+            .Where(s =>
+                s.ExecutionDate >= startDate
+                && s.ExecutionDate <= endDate
+                && existingSymbols.Contains(s.Symbol))
+            .ToList();
     }
 }

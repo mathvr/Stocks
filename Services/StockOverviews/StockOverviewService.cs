@@ -1,11 +1,9 @@
-using Microsoft.IdentityModel.Tokens;
 using STOCKS.Clients;
 using stocks.Data.Entities;
+using STOCKS.Data.Repository;
 using STOCKS.Data.Repository.AppUser;
-using STOCKS.Data.Repository.StockOverview;
 using STOCKS.Mappers;
 using STOCKS.Models;
-using stocks.Services.Session;
 
 namespace STOCKS.Services.StockOverviews
 {
@@ -13,11 +11,11 @@ namespace STOCKS.Services.StockOverviews
     {
         private readonly IStocksHttpClient _stocksHttpClient;
         private readonly IStocksMapper _stocksMapper;
-        private readonly IStockOverviewRepository _stockOverviewRepository;
+        private readonly IRepository<StockOverview> _stockOverviewRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         public IAppUserRepository _appUserRepository { get; }
 
-        public StockOverviewService(IStocksHttpClient stocksHttpClient, IAppUserRepository appUserRepository, IStocksMapper stocksMapper, IStockOverviewRepository stockOverviewRepository, IHttpContextAccessor httpContextAccessor)
+        public StockOverviewService(IStocksHttpClient stocksHttpClient, IAppUserRepository appUserRepository, IStocksMapper stocksMapper, IRepository<StockOverview> stockOverviewRepository, IHttpContextAccessor httpContextAccessor)
         {
             _appUserRepository = appUserRepository;
             _stocksHttpClient = stocksHttpClient;

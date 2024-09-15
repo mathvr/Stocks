@@ -1,15 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using stocks.Data.DbContext;
+using StockHistory = stocks.Data.Entities.StockHistory;
 
 namespace STOCKS.Data.Repository.StockHistory;
 
-public class StockHistoryRepository : IStockHistoryRepository
+public class StockHistoryRepository : IRepository<stocks.Data.Entities.StockHistory>
 {
     private readonly StocksContext _context;
 
     public StockHistoryRepository(StocksContext context)
     {
         _context = context;
+    }
+
+    public stocks.Data.Entities.StockHistory GetByName(string name)
+    {
+        throw new NotImplementedException();
     }
 
     public stocks.Data.Entities.StockHistory GetByGuid(Guid guid)
@@ -42,6 +48,11 @@ public class StockHistoryRepository : IStockHistoryRepository
         stockhistory.ModifiedOn = null;
 
         _context.Stockhistories.Add(stockhistory);
+    }
+
+    public void Delete(stocks.Data.Entities.StockHistory stockhistory)
+    {
+        _context.Stockhistories.Remove(stockhistory);
     }
 
     public void Delete(Guid StockHistoryId)

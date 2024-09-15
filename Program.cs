@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using STOCKS;
 using STOCKS.Clients;
 using stocks.Clients.News;
+using stocks.Clients.PolygonIo;
 using stocks.Clients.Stocks;
 using stocks.Data.DbContext;
 using stocks.Data.Entities;
@@ -13,6 +14,7 @@ using STOCKS.Data.Repository;
 using STOCKS.Data.Repository.AppUser;
 using STOCKS.Data.Repository.Connection;
 using STOCKS.Data.Repository.News;
+using STOCKS.Data.Repository.Splits;
 using STOCKS.Data.Repository.StockHistory;
 using STOCKS.Data.Repository.StockOverview;
 using STOCKS.Mappers;
@@ -20,6 +22,7 @@ using stocks.Services.AppUsers;
 using stocks.Services.Computation;
 using stocks.Services.News;
 using stocks.Services.Session;
+using stocks.Services.Splits;
 using STOCKS.Services.StockOverviews;
 using stocks.Services.TimeSeries;
 
@@ -59,8 +62,8 @@ builder.Services.AddDbContext<StocksContext>(
 
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 builder.Services.AddScoped<IConnectionRepository, ConnectionRepository>();
-builder.Services.AddScoped<IStockOverviewRepository, StockOverviewRepository>();
-builder.Services.AddScoped<IStockHistoryRepository, StockHistoryRepository>();
+builder.Services.AddScoped<IRepository<StockOverview>, StockOverviewRepository>();
+builder.Services.AddScoped<IRepository<StockHistory>, StockHistoryRepository>();
 builder.Services.AddScoped<IStocksHttpClient, StocksHttpClient>();
 builder.Services.AddScoped<IStocksMapper, StocksMapper>();
 builder.Services.AddScoped<IStocksOverviewService, StockOverviewService>();
@@ -73,6 +76,9 @@ builder.Services.AddScoped<IComputationService, ComputationService>();
 builder.Services.AddScoped<INewsHttpClient, NewsHttpClient>();
 builder.Services.AddScoped<IRepository<Article>, NewsRepository>();
 builder.Services.AddScoped<INewsService, NewsService>();
+builder.Services.AddScoped<IPolygonClient, PolygonClient>();
+builder.Services.AddScoped<ISplitService, SplitService>();
+builder.Services.AddScoped<IRepository<Split>, SplitRepository>();
 builder.Services.AddCors();
 
 var app = builder.Build();

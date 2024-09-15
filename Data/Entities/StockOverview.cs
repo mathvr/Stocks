@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using STOCKS;
 
 namespace stocks.Data.Entities;
@@ -25,6 +26,8 @@ public class StockOverview
     public DateTimeOffset? ModifiedOn { get; set; }
 
     public virtual ICollection<StockHistory> Stockhistories { get; set; } = new List<StockHistory>();
+    
+    public virtual ICollection<Split>? splits { get; set; }
     
     public virtual IEnumerable<Appuser> Appusers { get; set; } 
 }

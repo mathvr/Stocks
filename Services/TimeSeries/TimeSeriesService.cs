@@ -2,8 +2,7 @@ using Microsoft.Ajax.Utilities;
 using Newtonsoft.Json;
 using STOCKS.Clients;
 using stocks.Data.Entities;
-using STOCKS.Data.Repository.StockHistory;
-using STOCKS.Data.Repository.StockOverview;
+using STOCKS.Data.Repository;
 using STOCKS.Mappers;
 using STOCKS.Models;
 
@@ -13,10 +12,10 @@ public class TimeSeriesService : ITimeSeriesService
 {
     private readonly IStocksHttpClient _stocksHttpClient;
     private readonly IStocksMapper _stocksMapper;
-    private readonly IStockOverviewRepository _stockOverviewRepository;
-    private readonly IStockHistoryRepository _stockHistoryRepository;
+    private readonly IRepository<StockOverview> _stockOverviewRepository;
+    private readonly IRepository<StockHistory> _stockHistoryRepository;
 
-    public TimeSeriesService(IStocksHttpClient stocksHttpClient, IStocksMapper stocksMapper, IStockOverviewRepository stockOverviewRepository, IStockHistoryRepository stockHistoryRepository)
+    public TimeSeriesService(IStocksHttpClient stocksHttpClient, IStocksMapper stocksMapper, IRepository<StockOverview> stockOverviewRepository, IRepository<StockHistory>  stockHistoryRepository)
     {
         _stocksHttpClient = stocksHttpClient;
         _stocksMapper = stocksMapper;

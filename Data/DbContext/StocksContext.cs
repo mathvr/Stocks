@@ -21,12 +21,14 @@ public class StocksContext : IdentityDbContext
 
     public virtual DbSet<StockOverview> Stockoverviews { get; set; }
     
+    public virtual DbSet<Split> Splits { get; set; }
+    
     public virtual DbSet<Article> Articles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-
+        
         builder.Entity<IdentityRole>()
             .HasData(
                 new IdentityRole { Name = "User", NormalizedName = "USER" },

@@ -16,5 +16,6 @@ namespace STOCKS.Mappers
         StockHistory MapTimeSerieToEntity(TimeSerieApiModel model, StockOverview stockOverview);
         Article MapArticleToEntity(ArticleApiModel articleApiModel, StockOverview stockOverview);
         ArticleDto MapArticleToDto(Article article);
+        Split MapSplitToEntity(PolygonSplitApiModel.Split splitApiModel);
     }
 }

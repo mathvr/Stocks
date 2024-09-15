@@ -4,7 +4,7 @@ using stocks.Data.Entities;
 
 namespace STOCKS.Data.Repository.StockOverview;
 
-public class StockOverviewRepository : IStockOverviewRepository
+public class StockOverviewRepository : IRepository<stocks.Data.Entities.StockOverview>
 {
     private readonly StocksContext _context;
 
@@ -51,6 +51,16 @@ public class StockOverviewRepository : IStockOverviewRepository
         _context.Stockoverviews.Add(stockoverview);
 
         _context.SaveChanges();
+    }
+
+    public void Delete(stocks.Data.Entities.StockOverview stockoverview)
+    {
+        _context.Stockoverviews.Remove(stockoverview);
+    }
+
+    public void Delete(Guid guid)
+    {
+        _context.Stockoverviews.Remove(GetByGuid(guid));
     }
 
     public void Delete(string stockOverviewName)

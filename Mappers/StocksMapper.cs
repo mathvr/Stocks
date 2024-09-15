@@ -106,5 +106,17 @@ namespace STOCKS.Mappers
                 Url = article.Url ?? string.Empty,
             };
         }
+
+        public Split MapSplitToEntity(PolygonSplitApiModel.Split splitApiModel)
+        {
+            return new Split
+            {
+                ExecutionDate = splitApiModel.ExecutionDate,
+                InitialValue = splitApiModel.SplitFrom,
+                NewValue = splitApiModel.SplitTo,
+                SplitApiId = splitApiModel.SplitApiId,
+                Symbol = splitApiModel.Ticker,
+            };
+        }
     }
 }
