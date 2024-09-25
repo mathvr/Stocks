@@ -33,9 +33,10 @@ public class ComputationService : IComputationService
             .Select(s =>
             {
                 var differenceData = GetHistoryDifference(s, splits);
+                var name = $"{s.FirstOrDefault()?.StockOverview?.Name} ({s.FirstOrDefault()?.StockOverview?.Symbol})";
                 return new StockProgressionModel
                 {
-                    Symbol = s.Key,
+                    Name = name,
                     Difference = differenceData.Difference,
                     Percent = Decimal.Round(differenceData.Percent,0),
                     HasSplit = splits.Any(split => split.Symbol.Equals(s.Key)),

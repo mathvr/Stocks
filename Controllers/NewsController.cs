@@ -35,12 +35,17 @@ public class NewsController : ControllerBase
     }
 
     [HttpGet]
-    [Route("GetNews/symbol={symbol}&fromDays={fromDays}")]
-    public ActionResult<List<ArticleDto>> GetNews(string symbol, int fromDays)
+    [Route("GetNews/symbol={symbol}&fromDays={fromDays}&perSymbol={perSymbol}")]
+    public ActionResult<IList<ArticlesGroup>> GetNews(string symbol, int fromDays, int perSymbol)
     {
-        if (fromDays < 1)
+        if (fromDays < 0)
         {
-            return BadRequest("From days must be greater than 0");
+            return BadRequest("From days must at least 0");
+        }
+        
+        if (perSymbol < 0)
+        {
+            return BadRequest("From new per symbol filter must at least 0");
         }
 
         if (string.IsNullOrWhiteSpace(symbol))
@@ -48,16 +53,13 @@ public class NewsController : ControllerBase
             return BadRequest("Symbol must be provided");
         }
 
-        var serviceResponse = _newsService.GetByStockOverview(symbol, fromDays);
+        var serviceResponse = _newsService.GetByStockOverview(symbol, fromDays, perSymbol);
 
-        if (serviceResponse.WasSuccessfull && serviceResponse.Data.Any())
+        if (serviceResponse.WasSuccessfull)
         {
             return Ok(serviceResponse.Data);
         }
-        else if (serviceResponse.WasSuccessfull && !serviceResponse.Data.Any())
-        {
-            return NotFound("No articles were found");
-        }
+        
         else if (!serviceResponse.WasSuccessfull)
         {
             return Conflict("An error occured while getting the data");

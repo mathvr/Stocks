@@ -29,7 +29,7 @@ public class NewsService : INewsService
         _mapper = mapper;
     }
 
-    public TServiceResponse<List<ArticleDto>> GetByStockOverview(string symbol, int fromDays)
+    public TServiceResponse<IList<ArticlesGroup>> GetByStockOverview(string symbol, int fromDays, int perSymbol)
     {
         try
         {
@@ -39,10 +39,20 @@ public class NewsService : INewsService
                 .Where(a =>
                     a.StockOverview.Symbol == symbol &&
                     a.PublicationDate > DateTime.Now.AddDays(-1 * fromDays))
+                .ToList()
                 .Select(a => _mapper.MapArticleToDto(a))
+                .GroupBy(a => a.SourceName)
+                .Select(group => new ArticlesGroup
+                {
+                    GroupName = group.Key,
+                    Articles = group
+                        .OrderByDescending(a => a.PublicationDate)
+                        .Take(perSymbol)
+                        .ToList()
+                })
                 .ToList();
 
-            return new TServiceResponse<List<ArticleDto>>
+            return new TServiceResponse<IList<ArticlesGroup>> 
             {
                 Data = data,
                 WasSuccessfull = true
@@ -50,10 +60,11 @@ public class NewsService : INewsService
         }
         catch (Exception e)
         {
-            return new TServiceResponse<List<ArticleDto>>
+            return new TServiceResponse<IList<ArticlesGroup>> 
             {
-                Data = null,
-                WasSuccessfull = false
+                Data = new System.Collections.Generic.List<ArticlesGroup>(),
+                WasSuccessfull = false,
+                Message = e.Message
             };
         }
         
