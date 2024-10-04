@@ -24,7 +24,7 @@ services:
         CONNECTION_STRING: ${CONNECTION_STRING}
     volumes:
       - /home/math/RiderProjects/Stocks/Migrations:${APP_WORKDIR}/Migrations
-    command: bash -c "dotnet ef migrations add Migration_$(date +%Y%m%d%H%M%S) --output-dir /app/Migrations && dotnet ef database update"
+    command: bash -c "dotnet ef migrations add Migration_$(date +%Y%m%d%H%M%S) --output-dir ${APP_WORKDIR}/Migrations && dotnet ef database update"
     ports:
       - "8081:81"  
     
