@@ -4,6 +4,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0
 # Set Argument Variables
 ARG APP_WORKDIR=${APP_WORKDIR}
 ARG ACCEPT_EULA=${ACCEPT_EULA}
+ARG CONNECTION_STRING=${CONNECTION_STRING}
 
 # Set the working directory inside the container
 WORKDIR ${APP_WORKDIR}

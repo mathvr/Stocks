@@ -1,6 +1,5 @@
 version: '3.7'
 services:
-
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest  
     env_file: 
@@ -11,6 +10,8 @@ services:
       - $MSSQL_TCP_PORT
       
   config:
+    profiles:
+      - config
     env_file:
       - .env
     build:
@@ -28,6 +29,8 @@ services:
       - "8081:81"  
     
   app:
+    profiles:
+      - app
     env_file:
       - .env
     build:
