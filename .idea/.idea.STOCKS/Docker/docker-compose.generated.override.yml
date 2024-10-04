@@ -1,23 +1,6 @@
 # This is a generated file. Not intended for manual editing.
 version: "3.7"
 services:
-  app:
-    build:
-      context: "/home/math/RiderProjects/Stocks"
-      dockerfile: "DockerfileConfig"
-    command: []
-    entrypoint:
-    - "dotnet"
-    - "/app/bin/Debug/net8.0/stocks.dll"
-    environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
-    image: "stocks:dev"
-    ports: []
-    volumes:
-    - "/home/math/.nuget/packages:/root/.nuget/packages"
-    - "/home/math/RiderProjects/Stocks:/app:rw"
-    - "/home/math/RiderProjects/Stocks:/src:rw"
-    working_dir: "/app"
   config:
     build:
       context: "/home/math/RiderProjects/Stocks"

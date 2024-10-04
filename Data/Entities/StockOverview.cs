@@ -26,6 +26,8 @@ public class StockOverview
     public DateTimeOffset? ModifiedOn { get; set; }
 
     public virtual ICollection<StockHistory> Stockhistories { get; set; } = new List<StockHistory>();
+
+    public virtual Reputation? Reputation { get; set; }
     
     public virtual ICollection<Split>? splits { get; set; }
     

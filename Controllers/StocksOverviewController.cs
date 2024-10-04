@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using STOCKS.Clients;
+using stocks.Clients.OpenAi;
 using stocks.Data.Entities;
 using STOCKS.Models;
-using stocks.Services.Computation;
-using stocks.Services.News;
-using stocks.Services.Splits;
+using STOCKS.Models.ApiModels.OpenAi;
+using stocks.Services.Reputation;
 using STOCKS.Services.StockOverviews;
-using stocks.Services.TimeSeries;
 
 namespace STOCKS.Controllers;
 
@@ -16,11 +15,15 @@ public class StocksOverviewController : ControllerBase
 {
     private readonly IStocksHttpClient _stocksHttpClient;
     private readonly IStocksOverviewService _stocksOverviewService;
+    private readonly IOpenAiClient _openAiClient;
+    private readonly IReputationService _reputationService;
 
-    public StocksOverviewController(INewsService newsService, IStocksHttpClient stocksHttpClient, IStocksOverviewService stocksOverviewService, ITimeSeriesService timeSeriesService, IComputationService computationService, ISplitService splitService)
+    public StocksOverviewController(IStocksHttpClient stocksHttpClient, IStocksOverviewService stocksOverviewService, IOpenAiClient openAiClient, IReputationService reputationService)
     {
         _stocksHttpClient = stocksHttpClient;
         _stocksOverviewService = stocksOverviewService;
+        _openAiClient = openAiClient;
+        _reputationService = reputationService;
     }
 
     [HttpGet]
@@ -49,6 +52,29 @@ public class StocksOverviewController : ControllerBase
         }
 
         return BadRequest(response.Message);
+    }
+    
+    [HttpGet]
+    [Route("Reputation/GetSocialReputation/symbol={symbol}")]
+    public ActionResult<GetReputationApiModel> GetReputation(string symbol)
+    {
+        var list = new List<string>();
+        list.Add(symbol);
+        return Ok(_openAiClient.GetReputations(list));
+    }
+    
+    [HttpGet]
+    [Route("Reputation/DownloadValues")]
+    public ActionResult DownloadReputations()
+    {
+        var serviceResponse = _reputationService.DownloadReputations();
+
+        if (serviceResponse.WasSuccessfull)
+        {
+            return Ok(serviceResponse.Message);
+        }
+        
+        return StatusCode(500, serviceResponse.Message);
     }
 
     [HttpPost]

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using stocks.Data.Entities;
 using STOCKS.Models;
+using STOCKS.Models.ApiModels.OpenAi;
 using Article = stocks.Data.Entities.Article;
 
 namespace STOCKS.Mappers
@@ -53,7 +54,9 @@ namespace STOCKS.Mappers
                 Symbol = stockOverview.Symbol,
                 Description = stockOverview.Description, 
                 StartDate = stockOverview.StartDate,
-                EndDate = stockOverview.EndDate
+                EndDate = stockOverview.EndDate,
+                ReputationValue = stockOverview.Reputation?.ReputationValue,
+                ReputationFacts = stockOverview.Reputation?.ReputationFacts?.Select(f => f.Fact).ToList()
             };
         }
 
@@ -117,6 +120,30 @@ namespace STOCKS.Mappers
                 SplitApiId = splitApiModel.SplitApiId,
                 Symbol = splitApiModel.Ticker,
             };
+        }
+
+        public Reputation MapReputationToEntity(CompanyInfo reputationModel, StockOverview stockOverview)
+        {
+            return new Reputation
+            {
+                StockOverviewId = stockOverview.Id,
+                Symbol = reputationModel.Symbol,
+                ReputationValue = reputationModel.Reputation,
+                ModifiedOn = DateTimeOffset.Now
+            };
+        }
+
+        public List<ReputationFact> MapReputationFacts(CompanyInfo reputationModel, Reputation reputation)
+        {
+            return reputationModel.Facts
+                .Select(fact => new ReputationFact
+                {
+                    Fact = fact,
+                    Reputation = reputation,
+                    CreatedOn = DateTimeOffset.Now,
+                    ModifiedOn = DateTimeOffset.Now
+                })
+                .ToList();
         }
     }
 }

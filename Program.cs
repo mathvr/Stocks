@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using STOCKS;
 using STOCKS.Clients;
 using stocks.Clients.News;
+using stocks.Clients.OpenAi;
 using stocks.Clients.PolygonIo;
 using stocks.Clients.Stocks;
 using stocks.Data.DbContext;
@@ -14,6 +15,7 @@ using STOCKS.Data.Repository;
 using STOCKS.Data.Repository.AppUser;
 using STOCKS.Data.Repository.Connection;
 using STOCKS.Data.Repository.News;
+using STOCKS.Data.Repository.Reputation;
 using STOCKS.Data.Repository.Splits;
 using STOCKS.Data.Repository.StockHistory;
 using STOCKS.Data.Repository.StockOverview;
@@ -21,6 +23,7 @@ using STOCKS.Mappers;
 using stocks.Services.AppUsers;
 using stocks.Services.Computation;
 using stocks.Services.News;
+using stocks.Services.Reputation;
 using stocks.Services.Session;
 using stocks.Services.Splits;
 using STOCKS.Services.StockOverviews;
@@ -49,14 +52,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JWTSettings:TokenKey"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_TOKEN")))
         };
     });
     
 builder.Services.AddAuthorization();
 
 builder.Services.AddDbContext<StocksContext>(
-    options => options.UseSqlServer(config["Database:ConnectionString"]));
+    options => options.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING")));
 
 // Add services to the container.
 
@@ -79,6 +82,9 @@ builder.Services.AddScoped<INewsService, NewsService>();
 builder.Services.AddScoped<IPolygonClient, PolygonClient>();
 builder.Services.AddScoped<ISplitService, SplitService>();
 builder.Services.AddScoped<IRepository<Split>, SplitRepository>();
+builder.Services.AddScoped<IRepository<Reputation>, ReputationRepository>();
+builder.Services.AddScoped<IOpenAiClient, OpenAiClient>();
+builder.Services.AddScoped<IReputationService, ReputationService>();
 builder.Services.AddCors();
 
 var app = builder.Build();

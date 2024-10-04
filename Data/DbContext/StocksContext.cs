@@ -24,6 +24,8 @@ public class StocksContext : IdentityDbContext
     public virtual DbSet<Split> Splits { get; set; }
     
     public virtual DbSet<Article> Articles { get; set; }
+    
+    public virtual DbSet<Reputation> Reputations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -36,7 +38,5 @@ public class StocksContext : IdentityDbContext
             );
     }
      protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("data source=172.17.0.1,1433; initial catalog=StocksDb; user id=SA; password=MademoisellePoe01!; MultipleActiveResultSets=True; TrustServerCertificate=True;");
-    
-    
+        => optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING"));
 }

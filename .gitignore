@@ -478,3 +478,6 @@ $RECYCLE.BIN/
 
 # CUSTOM REMOVALS
 appsettings.json
+.env
+start.sh
+

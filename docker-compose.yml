@@ -4,37 +4,42 @@ services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest  
     env_file: 
-      - sqlvariables.env
+      - .env
     ports:
-      - "1433:1433"
+      - "${MSSQL_TCP_PORT}:${MSSQL_TCP_PORT}"
     expose: 
-      - 1433
+      - $MSSQL_TCP_PORT
       
   config:
+    env_file:
+      - .env
     build:
       dockerfile: DockerfileConfig
       context: .
-      args: 
-        TOOLS_PATH: "$PATH:/root/.dotnet/tools"
-        MIGRATION_NAME: MigrationIdentity
-        ACCEPT_EULA: Y
-        IS_CONFIGURATION: TRUE
+      args:
+        APP_WORKDIR: ${APP_WORKDIR}
+        ACCEPT_EULA: ${ACCEPT_EULA}
+        PATH_TOOLS: ${PATH_TOOLS}
+        CONNECTION_STRING: ${CONNECTION_STRING}
+    volumes:
+      - /home/math/RiderProjects/Stocks/Migrations:${APP_WORKDIR}/Migrations
+    command: bash -c "dotnet ef migrations add Migration_$(date +%Y%m%d%H%M%S) --output-dir /app/Migrations && dotnet ef database update"
     ports:
       - "8081:81"  
-    expose: 
-    - 8080
     
   app:
+    env_file:
+      - .env
     build:
       dockerfile: DockerfileBuildRun
       context: .
       args: 
-        TOOLS_PATH: "$PATH:/root/.dotnet/tools"
-        MIGRATION_NAME: Migration
-        ACCEPT_EULA: Y
-        IS_CONFIGURATION: TRUE
+        ACCEPT_EULA: ${ACCEPT_EULA}
+        APP_WORKDIR: ${APP_WORKDIR}
+        CONNECTION_STRING: ${CONNECTION_STRING}
+        JWT_TOKEN: ${JWT_TOKEN}
+    volumes:
+      - /home/math/RiderProjects/Stocks/Migrations:${APP_WORKDIR}/Migrations
     ports:
-      - "8080:80"  
-    expose: 
-    - 8080
+      - "8080:80"
     

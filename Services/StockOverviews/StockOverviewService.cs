@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using STOCKS.Clients;
 using stocks.Data.Entities;
 using STOCKS.Data.Repository;
@@ -187,6 +188,8 @@ namespace STOCKS.Services.StockOverviews
         {
             return _stockOverviewRepository
                 .GetAsQueryableAsNoTracking()
+                .Include(s => s.Reputation)
+                .ThenInclude(r => r.ReputationFacts)
                 .Where(s =>
                     s.Name.Contains(query)
                     || s.Symbol.Contains(query)
