@@ -38,11 +38,6 @@ builder.Services.AddIdentityCore<Appuser>()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<StocksContext>();
 
-var config = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.Development.json", false, false)
-    .Build();
-
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
     {
@@ -56,7 +51,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
     
-builder.Services.AddAuthorization();
+//builder.Services.AddAuthorization();
 
 builder.Services.AddDbContext<StocksContext>(
     options => options.UseSqlServer(Environment.GetEnvironmentVariable("CONNECTION_STRING")));
@@ -99,14 +94,13 @@ if (app.Environment.IsDevelopment())
 var scope = app.Services.CreateScope();
 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Appuser>>();
 
-app.UseHttpsRedirection();
-
 app.UseCors(opt =>
 {
-    opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
+    //opt.AllowAnyHeader().AllowAnyMethod().WithOrigins($"http://{Environment.GetEnvironmentVariable("CLIENT_NAME")}:3000");
+    opt.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
 });
 
-app.UseAuthorization();
+//app.UseAuthorization();
 
 app.MapControllers();
 

@@ -1,11 +1,10 @@
-# Use the official .NET SDK image as the base image
+﻿# Use the official .NET SDK image as the base image
 FROM mcr.microsoft.com/dotnet/sdk:8.0
 
 # Set Argument Variables
-ARG APP_WORKDIR=${APP_WORKDIR}
-ARG ACCEPT_EULA=${ACCEPT_EULA}
-ARG CONNECTION_STRING=${CONNECTION_STRING}
-ARG CLIENT_NAME=${CLIENT_NAME}
+ARG APP_WORKDIR=/app
+ARG ACCEPT_EULA=Y
+ARG CONNECTION_STRING
 
 # Set the working directory inside the container
 WORKDIR ${APP_WORKDIR}
@@ -14,13 +13,12 @@ WORKDIR ${APP_WORKDIR}
 COPY . ${APP_WORKDIR}
 
 # Install GnuPG (GPG) tools
-RUN apt-get update
-RUN apt-get install -y gnupg gnupg1 gnupg2
+RUN apt-get update && apt-get install -y gnupg gnupg1 gnupg2
 
 # Update the package list and install curl
 RUN apt-get update && apt-get install -y curl
 
-# Use the official .NET SDK image as the base image
+# Set up the Microsoft SQL Server repository
 RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc -o /tmp/microsoft.asc && apt-key add /tmp/microsoft.asc
 RUN curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/msprod.list
 
@@ -39,32 +37,23 @@ RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-archive-keyrin
 RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | tee /usr/share/keyrings/microsoft-archive-keyring.gpg > /dev/null
 RUN curl https://packages.microsoft.com/config/ubuntu/20.04/mssql-server-2019.list > /etc/apt/sources.list.d/mssql-release.list
 
-# ADD Ef package
-RUN dotnet add stocks.csproj package Microsoft.EntityFrameworkCore
+# Install the Entity Framework Core package
+RUN dotnet add stocks.csproj package Microsoft.EntityFrameworkCore -v 6.0.10
 
-# Install Entity Framework Core tools
-RUN dotnet tool install --global dotnet-ef
+# Install the Entity Framework Core tools
+RUN dotnet tool install --global dotnet-ef --version 8.0.0
 RUN apt-get update
 ARG TOOLS_PATH
 ENV PATH=${TOOLS_PATH}
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
-
-# Set Argument Variables
-ARG APP_WORKDIR=${APP_WORKDIR}
-
-WORKDIR ${APP_WORKDIR}
-
-# Copy everything
-COPY . ./
-# Restore as distinct layers
-RUN dotnet nuget locals all --clear
-RUN dotnet restore
-# Build and publish a release
+# Publish the .NET application
 RUN dotnet publish -c Release -o out
 
-# Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+# Set the working directory to the output folder
+WORKDIR /app/out
+
+#Create Directory for Migrations
+RUN mkdir -p ${APP_WORKDIR}/Migrations
 
 # Set Argument Variables
 ARG APP_WORKDIR=${APP_WORKDIR}
@@ -74,10 +63,10 @@ ENV MSSQL_TCP_PORT=${MSSQL_TCP_PORT}
 ENV CONNECTION_STRING=${CONNECTION_STRING}
 ENV JWT_TOKEN=${JWT_TOKEN}
 ENV CLIENT_NAME=${CLIENT_NAME}
+ENV PATH=${TOOLS_PATH}
 
 WORKDIR ${APP_WORKDIR}
 COPY --from=build-env ${APP_WORKDIR}/out .
 
-# Specify the entry point for your application
-ENTRYPOINT ["dotnet","stocks.dll"]
-
+# Set the ENTRYPOINT to automatically run migrations and update the database
+ENTRYPOINT ["dotnet", "stocks.dll"]

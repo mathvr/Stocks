@@ -20,6 +20,4 @@ public class Reputation
     public DateTimeOffset? CreatedOn { get; set; }
     
     public DateTimeOffset? ModifiedOn { get; set; }
-    
-    public string Titi2 { get; set; }
 }

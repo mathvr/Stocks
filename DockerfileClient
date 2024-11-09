@@ -1,0 +1,17 @@
+﻿FROM node:18-alpine
+
+WORKDIR /app
+ARG VITE_APP_SERVER_NAME=${VITE_APP_SERVER_NAME}
+
+# Copy `package.json` and `package-lock.json` for dependency installation
+COPY ./StockClient/StockClient/package*.json ./
+
+RUN npm install
+
+COPY ./StockClient/StockClient . 
+
+EXPOSE 3000
+
+ENV VITE_APP_SERVER_NAME=${VITE_APP_SERVER_NAME}
+
+CMD ["npm", "start"]

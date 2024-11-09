@@ -3,10 +3,8 @@ using System.Text;
 using Newtonsoft.Json;
 using STOCKS;
 using stocks.Data;
-using STOCKS.Data.Repository;
 using STOCKS.Data.Repository.Connection;
 using STOCKS.Models.ApiModels.OpenAi;
-using stocks.Services.Helpers;
 
 namespace stocks.Clients.OpenAi;
 

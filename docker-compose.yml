@@ -1,14 +1,19 @@
-version: '3.7'
+version: '3.8'
+    
 services:
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest  
+    image: mcr.microsoft.com/mssql/server:2022-latest
     env_file: 
       - .env
     ports:
       - "${MSSQL_TCP_PORT}:${MSSQL_TCP_PORT}"
     expose: 
       - $MSSQL_TCP_PORT
-      
+    logging:
+      driver: "none"
+    networks:
+      - stocks-network
+  
   config:
     profiles:
       - config
@@ -22,11 +27,14 @@ services:
         ACCEPT_EULA: ${ACCEPT_EULA}
         PATH_TOOLS: ${PATH_TOOLS}
         CONNECTION_STRING: ${CONNECTION_STRING}
+    image: mathvr/stocks-config:latest
     volumes:
       - /home/math/RiderProjects/Stocks/Migrations:${APP_WORKDIR}/Migrations
     command: bash -c "dotnet ef migrations add Migration_$(date +%Y%m%d%H%M%S) --output-dir ${APP_WORKDIR}/Migrations && dotnet ef database update"
     ports:
-      - "8081:81"  
+      - "8081:8081"
+    networks:
+      - stocks-network
     
   app:
     profiles:
@@ -40,9 +48,34 @@ services:
         ACCEPT_EULA: ${ACCEPT_EULA}
         APP_WORKDIR: ${APP_WORKDIR}
         CONNECTION_STRING: ${CONNECTION_STRING}
+        PATH_TOOLS: ${PATH_TOOLS}
         JWT_TOKEN: ${JWT_TOKEN}
+        CLIENT_NAME: ${CLIENT_NAME}
+    image: mathvr/stocks-app:latest
     volumes:
       - /home/math/RiderProjects/Stocks/Migrations:${APP_WORKDIR}/Migrations
     ports:
-      - "8080:80"
+      - "8080:8080"
+    networks:
+      - stocks-network
     
+  client:
+    profiles:
+      - app
+    env_file: 
+      - .env
+    image: mathvr/stocks-client:latest
+    build:
+      dockerfile: DockerfileClient
+      context: .
+      args:
+        VITE_APP_SERVER_NAME: ${VITE_APP_SERVER_NAME}
+    ports:
+      - "3000:3000"
+    networks:
+      - stocks-network
+
+networks:
+  stocks-network:
+    driver: bridge
+  
