@@ -32,14 +32,17 @@ public class ComputationService : IComputationService
             .GroupBy(s => s.StockOverview.Symbol)
             .Select(s =>
             {
-                var differenceData = GetHistoryDifference(s, splits);
+                var differenceData = GetHistoryDifference(s, splits, startDate, endDate);
                 var name = $"{s.FirstOrDefault()?.StockOverview?.Name} ({s.FirstOrDefault()?.StockOverview?.Symbol})";
+                var lastValue = s.OrderByDescending(s => s.Date).FirstOrDefault();
                 return new StockProgressionModel
                 {
                     Name = name,
                     Difference = differenceData.Difference,
                     Percent = Decimal.Round(differenceData.Percent,0),
                     HasSplit = splits.Any(split => split.Symbol.Equals(s.Key)),
+                    CurrentValue = lastValue?.CloseValue,
+                    ValueDate = lastValue?.Date.ToShortDateString(),
                 };
             })
             .OrderByDescending(s => s.Percent)
@@ -54,7 +57,7 @@ public class ComputationService : IComputationService
         };
     }
 
-    private StockDifference GetHistoryDifference(IGrouping<string, StockHistory> group, List<Split> splits)
+    private StockDifference GetHistoryDifference(IGrouping<string, StockHistory> group, List<Split> splits, DateTime startDate, DateTime endDate)
     {
         var endValue = group
             .OrderByDescending(d => d.Date)
@@ -64,7 +67,8 @@ public class ComputationService : IComputationService
             .OrderBy(d => d.Date)
             .First();
 
-        var split = splits.Where(s => s.Symbol.Equals(group.Key));
+        var split = splits
+            .Where(s => s.Symbol.Equals(group.Key));
 
         if (split.Any())
         {

@@ -143,4 +143,15 @@ public class StocksOverviewController : ControllerBase
 
         return BadRequest(result.Message);
     }
+
+    [HttpDelete]
+    [Route("Delete/{symbol}")]
+    public IActionResult DeleteOverview(string symbol)
+    {
+        var serviceResponse = _stocksOverviewService.DeleteStockOverview(symbol);
+        
+        return serviceResponse.WasSuccessfull
+            ? Ok(serviceResponse.Message)
+            : BadRequest(serviceResponse.Message);
+    }
 }

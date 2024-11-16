@@ -9,5 +9,6 @@ namespace STOCKS.Services.StockOverviews
         ServiceResponse UpdateStockOverviews();
         List<StockOverviewDto> GetUserStockOverviews(string userEmail);
         TServiceResponse<List<StockOverviewDto>> GetExistingStockOverviews(string query, int top);
+        ServiceResponse DeleteStockOverview(string symbol);
     }
 }

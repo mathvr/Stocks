@@ -11,4 +11,6 @@ public partial interface IRepository<T> where T : class
     void Delete(Guid guid);
     void Update(T entity);
     void Save();
+    void Dispose();
+    public void SqlQuery(string query);
 }

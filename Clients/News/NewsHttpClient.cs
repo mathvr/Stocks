@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.RegularExpressions;
 using STOCKS;
 using STOCKS.Clients;
 using stocks.Data.Entities;
@@ -10,6 +11,7 @@ namespace stocks.Clients.News;
 public class NewsHttpClient : INewsHttpClient
 {
     private readonly IConnectionRepository _connectionRepository;
+    private static string[] WORDS_TO_REMOVE = ["Inc", "Corp", "AG", "Incorporated"];
 
     public NewsHttpClient(IConnectionRepository connectionRepository)
     {
@@ -32,7 +34,7 @@ public class NewsHttpClient : INewsHttpClient
             
             client.DefaultRequestHeaders.Add("User-Agent", "C# App");
             
-            var requestUri = $"/v2/everything?q={stockOverview.Symbol}&from={from}&to={to}&apiKey={DecodeBase64(connection.ClientSecret)}";
+            var requestUri = $"/v2/everything?q={GetApiQuery(stockOverview.Name)}&from={from}&to={to}&apiKey={DecodeBase64(connection.ClientSecret)}";
 
             return new StockOverviewandResponse
             {
@@ -63,5 +65,13 @@ public class NewsHttpClient : INewsHttpClient
     private string DecodeBase64(string encodedCs)
     {
         return Encoding.UTF8.GetString(Convert.FromBase64String(encodedCs)); 
+    }
+
+    private string GetApiQuery(string fullName)
+    {
+        var pattern = $@"\b({string.Join("|", WORDS_TO_REMOVE)})\b.*";
+        
+        // Replace the pattern match with an empty string
+        return Regex.Replace(fullName, pattern, "").Trim();
     }
 }

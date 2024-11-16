@@ -66,4 +66,14 @@ public class ReputationRepository : IRepository<stocks.Data.Entities.Reputation>
         _stocksContext
             .SaveChanges();
     }
+
+    public void Dispose()
+    {
+        _stocksContext.Dispose();
+    }
+    
+    public void SqlQuery(string query)
+    {
+        _stocksContext.Database.ExecuteSqlRaw(query);
+    }
 }

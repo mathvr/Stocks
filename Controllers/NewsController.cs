@@ -67,4 +67,15 @@ public class NewsController : ControllerBase
 
         return BadRequest();
     }
+
+    [HttpDelete]
+    [Route("DeleteAll")]
+    public IActionResult DeleteNewsAll()
+    {
+        var response = _newsService.DeleteAllArticles();
+        
+        return response.WasSuccessfull
+            ? Ok(response.Message)
+            : BadRequest(response.Message);
+    }
 }

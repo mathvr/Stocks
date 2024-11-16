@@ -61,4 +61,14 @@ public class NewsRepository : IRepository<Article>
     {
         _context.SaveChanges();
     }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
+
+    public void SqlQuery(string query)
+    {
+        _context.Database.ExecuteSqlRaw(query);
+    }
 }

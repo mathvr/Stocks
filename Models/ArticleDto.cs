@@ -6,6 +6,7 @@ public class ArticleDto
     public string Title { get; set; }
     public string Content { get; set; }
     public DateTime PublicationDate { get; set; }
+    public string PublicationDateText { get; set; }
     public string Author { get; set; }
     public string Url { get; set; }
     public string SourceName { get; set; }

@@ -47,10 +47,10 @@ public class ReputationService : IReputationService
                     continue;
                 }
 
-                if (overview.Reputation != null)
+                if (overview.Reputation != null && IsToUpdate(overview))
                 {
-                    var reputation = overview.Reputation;
-                    reputation = _mapper.MapReputationToEntity(model, overview);
+                    RemoveReputation(overview);
+                    var reputation = _mapper.MapReputationToEntity(model, overview);
                     reputation.ReputationFacts = _mapper.MapReputationFacts(model, overview.Reputation);
                     _reputationRepository.Update(reputation);
                 }
@@ -90,5 +90,17 @@ public class ReputationService : IReputationService
             .Include(o => o.Reputation)
             .Where(o => o.Reputation == null || o.Reputation.ModifiedOn < DateTime.Now.AddDays(60))
             .ToList();
+    }
+
+    private bool IsToUpdate(StockOverview stockOverview)
+    {
+        return stockOverview.Reputation?.ReputationFacts?.Count < 5 ||
+               stockOverview.Reputation?.ModifiedOn?.Date < DateTime.Now.AddYears(-1).Date;
+    }
+
+    private void RemoveReputation(StockOverview stockOverview)
+    {
+        _reputationRepository.Delete(stockOverview.Reputation);
+        _reputationRepository.Save();
     }
 }

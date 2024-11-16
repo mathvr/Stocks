@@ -14,15 +14,17 @@ namespace STOCKS.Services.StockOverviews
         private readonly IStocksMapper _stocksMapper;
         private readonly IRepository<StockOverview> _stockOverviewRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IRepository<Reputation> _reputationRepository;
         public IAppUserRepository _appUserRepository { get; }
 
-        public StockOverviewService(IStocksHttpClient stocksHttpClient, IAppUserRepository appUserRepository, IStocksMapper stocksMapper, IRepository<StockOverview> stockOverviewRepository, IHttpContextAccessor httpContextAccessor)
+        public StockOverviewService(IStocksHttpClient stocksHttpClient, IAppUserRepository appUserRepository, IStocksMapper stocksMapper, IRepository<StockOverview> stockOverviewRepository, IHttpContextAccessor httpContextAccessor, IRepository<Reputation> reputationRepository)
         {
             _appUserRepository = appUserRepository;
             _stocksHttpClient = stocksHttpClient;
             _stocksMapper = stocksMapper;
             _stockOverviewRepository = stockOverviewRepository;
             _httpContextAccessor = httpContextAccessor;
+            _reputationRepository = reputationRepository;
         }
 
         public ServiceResponse AddCompanyToUserProfile(string companySymbol)
@@ -77,7 +79,7 @@ namespace STOCKS.Services.StockOverviews
                 return new ServiceResponse
                 {
                     Message = $"{companySymbol} already exists in the system",
-                    WasSuccessfull = false
+                    WasSuccessfull = true
                 };
             }
 
@@ -184,6 +186,44 @@ namespace STOCKS.Services.StockOverviews
                 .ToList();
         }
 
+        public ServiceResponse DeleteStockOverview(string symbol)
+        {
+            var entity = _stockOverviewRepository
+                .GetAsQueryable()
+                .Include(r => r.Reputation)
+                .FirstOrDefault(s => s.Symbol.ToLower().Equals(symbol.ToLower()));
+
+            if (entity == null)
+            {
+                return new ServiceResponse
+                {
+                    WasSuccessfull = false,
+                    Message = "This symbol could not be found!"
+                };
+            }
+
+            try
+            {
+                CascadeDelete(entity);
+                _stockOverviewRepository.Delete(entity);
+                _stockOverviewRepository.Save();
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.Message);
+                return new ServiceResponse
+                {
+                    WasSuccessfull = false,
+                };
+            }
+
+            return new ServiceResponse
+            {
+                WasSuccessfull = true,
+                Message = $"{symbol} has been deleted"
+            };
+        }
+
         private List<StockOverview> RetrieveStockFromQuery(string query)
         {
             return _stockOverviewRepository
@@ -195,6 +235,16 @@ namespace STOCKS.Services.StockOverviews
                     || s.Symbol.Contains(query)
                     || s.Exchange.Contains(query))
                 .ToList();
+        }
+
+        private void CascadeDelete(StockOverview entity)
+        {
+            if (entity.Reputation != null)
+            {
+                _reputationRepository.Delete(entity.Reputation);
+            }
+            
+            _reputationRepository.Save();
         }
     }
 }

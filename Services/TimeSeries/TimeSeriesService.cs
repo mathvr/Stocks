@@ -30,7 +30,7 @@ public class TimeSeriesService : ITimeSeriesService
             .ToList();
 
         GetAndSaveData(overviews, fromDate);
-
+        
         return new ServiceResponse
         {
             WasSuccessfull = true,

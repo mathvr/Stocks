@@ -76,7 +76,7 @@ public class NewsService : INewsService
         var unsucessfullUpdateSymbols = new List<string>();
         var responseList = new List<Task<StockOverviewandResponse>>();
         
-        GetStockOvervies()
+        GetStockOverviews()
             .AsParallel()
             .ForEach(stock =>
             {
@@ -127,7 +127,33 @@ public class NewsService : INewsService
         };
     }
 
-    private List<StockOverview> GetStockOvervies()
+    public ServiceResponse DeleteAllArticles()
+    {
+        var query = "DELETE FROM ARTICLES";
+
+        try
+        {
+            _articleRepository.SqlQuery(query);
+            _articleRepository.Save();
+
+            return new ServiceResponse
+            {
+                WasSuccessfull = true,
+                Message = "News successfully deleted",
+            };
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e.Message);
+            return new ServiceResponse
+            {
+                WasSuccessfull = false,
+                Message = "An error occured while trying to delete the Articles"
+            };
+        }
+    }
+
+    private List<StockOverview> GetStockOverviews()
     {
         return _stockOverviewRepository
             .GetAsQueryable()
@@ -144,7 +170,9 @@ public class NewsService : INewsService
         try
         {
             var existingArticleNames = GetExistingArticleNames();
-            foreach (var article in articles.Where(a => !existingArticleNames.Contains(a.Title)))
+            foreach (var article in articles
+                         .Where(a => !existingArticleNames.Contains(a.Title)
+                         && GetNewsProviders().Contains(a?.Source?.Name)))
             {
                 var entity = _mapper.MapArticleToEntity(article, stockOverview);
                 _articleRepository.Add(entity);
@@ -166,5 +194,14 @@ public class NewsService : INewsService
             .GetAsQueryableAsNoTracking()
             .Select(a => a.Title)
             .ToList();
+    }
+
+    private string[] GetNewsProviders()
+    {
+        return
+        [
+            "BBC News", "Business Insider", "CNET", "Forbes", "CNN", "CNBC", "HuffPost", "Investing.com",
+            "Investor's Business Daily", "Le Monde", "Yahoo Entertainment"
+        ];
     }
 }

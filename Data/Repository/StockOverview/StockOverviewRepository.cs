@@ -88,4 +88,14 @@ public class StockOverviewRepository : IRepository<stocks.Data.Entities.StockOve
     {
         _context.SaveChanges();
     }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
+
+    public void SqlQuery(string query)
+    {
+        _context.Database.ExecuteSqlRaw(query);
+    }
 }

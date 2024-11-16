@@ -104,6 +104,7 @@ namespace STOCKS.Mappers
                 Content = article.Content ?? string.Empty,
                 Id = article.Id,
                 PublicationDate = article.PublicationDate,
+                PublicationDateText = article.PublicationDate.Date.ToString("dd/MM/yyyy"),
                 SourceName = article.SourceName ?? string.Empty,
                 StockSymbol = article.StockOverview?.Symbol ?? string.Empty,
                 Url = article.Url ?? string.Empty,
