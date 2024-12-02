@@ -19,7 +19,7 @@ namespace STOCKS.Mappers
         ArticleDto MapArticleToDto(Article article);
         Split MapSplitToEntity(PolygonSplitApiModel.Split splitApiModel);
         Reputation MapReputationToEntity(CompanyInfo reputationModel, StockOverview stockOverview);
-
         List<ReputationFact> MapReputationFacts(CompanyInfo reputationModel, Reputation reputation);
+        IEnumerable<Financials> MapToFinancials(GetFinancialsApiModel? financialsApiModel);
     }
 }

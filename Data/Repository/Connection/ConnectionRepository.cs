@@ -11,7 +11,7 @@ public class ConnectionRepository : IConnectionRepository
     {
         _context = context;
     }
-    /**/
+    
     public STOCKS.Connection GetByName(string name)
     {
         return _context.Connections

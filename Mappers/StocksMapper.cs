@@ -146,5 +146,63 @@ namespace STOCKS.Mappers
                 })
                 .ToList();
         }
+
+        public IEnumerable<Financials> MapToFinancials(GetFinancialsApiModel financialsApiModel)
+        {
+            var list = new List<Financials>();
+
+            foreach (var report in financialsApiModel.Data.SelectMany(s => s.Report.BalanceSheet))
+            {
+                list.Add(new Financials
+                {
+                    Id = Guid.NewGuid(),
+                    Symbol = financialsApiModel.Data.FirstOrDefault()?.Symbol,
+                    Year = financialsApiModel.Data.FirstOrDefault()?.Year.ToString(),
+                    FromDate = DateTimeOffset.Parse(financialsApiModel.Data.FirstOrDefault()?.StartDate),
+                    ToDate = DateTimeOffset.Parse(financialsApiModel.Data.FirstOrDefault()?.EndDate),
+                    Property = report.Concept,
+                    Value = report.Value,
+                    PropertyName = report.Label,
+                    Unit = report.Unit,
+                    CreatedOn = DateTimeOffset.Now,
+                });
+            }
+            
+            foreach (var report in financialsApiModel.Data.SelectMany(s => s.Report.CashFlow))
+            {
+                list.Add(new Financials
+                {
+                    Id = Guid.NewGuid(),
+                    Symbol = financialsApiModel.Data.FirstOrDefault()?.Symbol,
+                    Year = financialsApiModel.Data.FirstOrDefault()?.Year.ToString(),
+                    FromDate = DateTimeOffset.Parse(financialsApiModel.Data.FirstOrDefault()?.StartDate),
+                    ToDate = DateTimeOffset.Parse(financialsApiModel.Data.FirstOrDefault()?.EndDate),
+                    Property = report.Concept,
+                    Value = report.Value,
+                    PropertyName = report.Label,
+                    Unit = report.Unit,
+                    CreatedOn = DateTimeOffset.Now,
+                });
+            }
+            
+            foreach (var report in financialsApiModel.Data.SelectMany(s => s.Report.IncomeStatement))
+            {
+                list.Add(new Financials
+                {
+                    Id = Guid.NewGuid(),
+                    Symbol = financialsApiModel.Data.FirstOrDefault()?.Symbol,
+                    Year = financialsApiModel.Data.FirstOrDefault()?.Year.ToString(),
+                    FromDate = DateTimeOffset.Parse(financialsApiModel.Data.FirstOrDefault()?.StartDate),
+                    ToDate = DateTimeOffset.Parse(financialsApiModel.Data.FirstOrDefault()?.EndDate),
+                    Property = report.Concept,
+                    Value = report.Value,
+                    PropertyName = report.Label,
+                    Unit = report.Unit,
+                    CreatedOn = DateTimeOffset.Now,
+                });
+            }
+
+            return list;
+        }
     }
 }

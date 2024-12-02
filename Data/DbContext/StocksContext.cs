@@ -26,6 +26,8 @@ public class StocksContext : IdentityDbContext
     public virtual DbSet<Article> Articles { get; set; }
     
     public virtual DbSet<Reputation> Reputations { get; set; }
+    
+    public virtual DbSet<Financials> Financials { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
